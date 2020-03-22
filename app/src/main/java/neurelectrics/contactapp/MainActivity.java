@@ -104,15 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
 //set up bluetooth
          checkLocationPermission(); //get permissions to use bt
-        mHandler = new Handler();
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, "BLE Not Supported",
-                    Toast.LENGTH_SHORT).show();
-            finish();
-        }
-        final BluetoothManager bluetoothManager =
-                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
+
 
 
         //update the screen with list of detected devices
@@ -139,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
         handler.postDelayed(updateLoop, 5000);
     }
 
+    /*
     @Override
     protected void onResume() {
         super.onResume();
@@ -171,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
         mGatt.close();
         mGatt = null;
         super.onDestroy();
-    }
+    }*/
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_ENABLE_BT) {
