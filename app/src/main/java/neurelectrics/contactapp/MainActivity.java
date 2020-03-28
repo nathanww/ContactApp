@@ -48,14 +48,9 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
-    private BluetoothAdapter mBluetoothAdapter;
     private int REQUEST_ENABLE_BT = 1;
     private Handler mHandler;
-    private static final long SCAN_PERIOD = 10000;
-    private BluetoothLeScanner mLEScanner;
-    private ScanSettings settings;
-    private List<ScanFilter> filters;
-    private BluetoothGatt mGatt;
+
     int LIST_THRESH = -65; //minimal signal strength to show up in the list
     //hashMap that stores bt device info index by address
     HashMap<String, ScanResult> results = new HashMap<String, ScanResult>();
@@ -79,23 +74,15 @@ public class MainActivity extends AppCompatActivity {
 
         //handle starting and stopping the service
         final Button startServiceButton = (Button)findViewById(R.id.startstop);
-        if (serviceStatus) {
-            startServiceButton.setText("Stop");
-        }
+
 
         startServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean localstatus= prefs.getBoolean("serviceRunning", false);
                 Intent intent = new Intent(MainActivity.this, MyForeGroundService.class);
-                if (localstatus) {//the thing is already running
-                    intent.setAction(MyForeGroundService.ACTION_STOP_FOREGROUND_SERVICE);
-                    startServiceButton.setText("Start");
-                }
-                else {
-                    intent.setAction(MyForeGroundService.ACTION_START_FOREGROUND_SERVICE);
-                    startServiceButton.setText("Stop");
-                }
+
+                intent.setAction(MyForeGroundService.ACTION_START_FOREGROUND_SERVICE);
                 startService(intent);
                 //serviceStatus= !serviceStatus;
                 startServiceButton.invalidate();
@@ -104,15 +91,6 @@ public class MainActivity extends AppCompatActivity {
 
 //set up bluetooth
          checkLocationPermission(); //get permissions to use bt
-        final BluetoothManager bluetoothManager =
-                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-        mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
-        settings = new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .build();
-        filters = new ArrayList<ScanFilter>();
-        scanLeDevice(true);
 
 
         //update the screen with list of detected devices
@@ -122,8 +100,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 String dispResult = "";
-                for (String i : results.keySet()) {
-                    ScanResult temp = results.get(i);
+                for (String i : scanData.getInstance().getData().keySet()) {
+                    ScanResult temp = scanData.getInstance().getData().get(i);
                     if (temp.getRssi() > LIST_THRESH) {
                         dispResult = dispResult + temp.getDevice().getAddress() + " : " + temp.getDevice().getName() + " " + temp.getRssi() + "\n";
                     }
@@ -191,25 +169,7 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
-    private void scanLeDevice(final boolean enable) {
-        if (enable) { //start scanning process
 
-                mLEScanner.startScan(filters, settings, mScanCallback);
-            Log.e("scan", "Starting scan...");
-        } else {
-
-                mLEScanner.stopScan(mScanCallback);
-
-        }
-    }
-    private ScanCallback mScanCallback = new ScanCallback() {
-        @Override
-        public void onScanResult(int callbackType, ScanResult result) {
-            results.put(result.getDevice().getAddress(), result);
-
-        }
-
-    };
 
 
     public boolean checkLocationPermission() {

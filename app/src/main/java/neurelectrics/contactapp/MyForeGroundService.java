@@ -5,6 +5,14 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,6 +36,9 @@ import com.android.volley.toolbox.Volley;
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -39,7 +50,12 @@ public class MyForeGroundService extends Service {
 
     public static final String ACTION_STOP_FOREGROUND_SERVICE = "ACTION_STOP_FOREGROUND_SERVICE";
 
-
+    private BluetoothLeScanner mLEScanner;
+    private ScanSettings settings;
+    private List<ScanFilter> filters;
+    private BluetoothGatt mGatt;
+    private BluetoothAdapter mBluetoothAdapter;
+    HashMap<String, ScanResult> scanResults = new HashMap<String, ScanResult>();
 
     public MyForeGroundService() {
     }
@@ -76,8 +92,7 @@ public class MyForeGroundService extends Service {
     }
 
     /* Used to build and start foreground service. */
-    private void startForegroundService()
-    {
+    private void startForegroundService() {
         final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean("serviceRunning",true);
@@ -106,8 +121,38 @@ public class MyForeGroundService extends Service {
         // Start foreground service.
         startForeground(1, notification);
 
-
+        //start Bluetooth
+        final BluetoothManager bluetoothManager =
+                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+        mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
+        settings = new ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .build();
+        filters = new ArrayList<ScanFilter>();
+        scanLeDevice(true);
     }
+
+    private void scanLeDevice(final boolean enable) {
+        if (enable) { //start scanning process
+
+            mLEScanner.startScan(filters, settings, mScanCallback);
+            Log.e("scan", "Starting scan...");
+        } else {
+
+            mLEScanner.stopScan(mScanCallback);
+
+        }
+    }
+
+    private ScanCallback mScanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            scanResults.put(result.getDevice().getAddress(), result);
+            scanData.getInstance().setData(scanResults);
+        }
+
+    };
 
     private void stopForegroundService()
     {
