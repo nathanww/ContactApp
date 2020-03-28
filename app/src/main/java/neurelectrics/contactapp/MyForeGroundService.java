@@ -36,7 +36,9 @@ import com.android.volley.toolbox.Volley;
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -56,7 +58,7 @@ public class MyForeGroundService extends Service {
     private BluetoothGatt mGatt;
     private BluetoothAdapter mBluetoothAdapter;
     HashMap<String, ScanResult> scanResults = new HashMap<String, ScanResult>();
-
+    int CONTACT_THRESH = -65; //signals closer than this count as a close contact
     public MyForeGroundService() {
     }
 
@@ -150,6 +152,21 @@ public class MyForeGroundService extends Service {
         public void onScanResult(int callbackType, ScanResult result) {
             scanResults.put(result.getDevice().getAddress(), result);
             scanData.getInstance().setData(scanResults);
+
+            //check to see if this is a contact
+            if (result.getRssi() >= CONTACT_THRESH) {
+                //check if it is ignored
+                if (getSharedPreferences("com", MODE_PRIVATE).getString("ignoreDevices", "").indexOf(result.getDevice().getAddress()) == -1) {
+                    //not in the ignore list!
+                    SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
+                    String todayKey = todayFormat.format(Calendar.getInstance().getTime());
+                    final SharedPreferences.Editor editor = getSharedPreferences("com", MODE_PRIVATE).edit();
+                    //get the total number of contacts today, add one, and write it back
+                    editor.putInt(todayKey, getSharedPreferences("com", MODE_PRIVATE).getInt(todayKey, 0) + 1);
+                    editor.apply();
+                }
+
+            }
         }
 
     };

@@ -15,6 +15,13 @@
         android:text="Start" />
 
     <TextView
+        android:id="@+id/contactsList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Exposure today: 0"
+        tools:textSize="24sp" />
+
+    <TextView
         android:id="@+id/scanResults"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

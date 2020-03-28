@@ -41,7 +41,9 @@ import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -105,10 +107,16 @@ public class MainActivity extends AppCompatActivity {
 
         //update the screen with list of detected devices
         final TextView status = (TextView) findViewById(R.id.scanResults);
+        final TextView contactsToday = (TextView) findViewById(R.id.contactsList);
         final Handler handler = new Handler();
         final Runnable updateLoop = new Runnable() {
             @Override
             public void run() {
+                // first update the total number of contacts today
+                SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
+                String todayKey = todayFormat.format(Calendar.getInstance().getTime());
+                contactsToday.setText("Exposure today: " + prefs.getInt(todayKey, 0));
+
                 String dispResult = "";
                 for (String i : scanData.getInstance().getData().keySet()) {
                     ScanResult temp = scanData.getInstance().getData().get(i);
