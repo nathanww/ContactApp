@@ -21,6 +21,7 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -133,6 +134,13 @@ public class MyForeGroundService extends Service {
                 .build();
         filters = new ArrayList<ScanFilter>();
         scanLeDevice(true);
+
+        //tell the system not to go to sleep
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "ContactApp::BluetoothScan");
+        wakeLock.acquire();
+
     }
 
     private void scanLeDevice(final boolean enable) {

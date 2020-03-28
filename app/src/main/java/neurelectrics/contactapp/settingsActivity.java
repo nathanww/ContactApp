@@ -37,7 +37,7 @@ public class settingsActivity extends AppCompatActivity {
                     ignoreDevices = ignoreDevices + temp.getDevice().getAddress() + " ";
                     devices++;
                 }
-                editor.putString("ignoreDevices", ignoreDevices);
+                editor.putString("ignoreDevices", ignoreDevices + prefs.getString("ignoreDevices", ""));
                 editor.commit();
                 Toast.makeText(getApplicationContext(), "Added " + devices + " beacons to ignore list", Toast.LENGTH_LONG);
                 Log.i("Ignoredevices", ignoreDevices);
