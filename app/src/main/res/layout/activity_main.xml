@@ -20,5 +20,18 @@
         android:layout_height="wrap_content"
         android:text="Waiting..." />
 
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/settingsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Settings"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="396dp" />
+    </android.support.constraint.ConstraintLayout>
+
 
 </LinearLayout>

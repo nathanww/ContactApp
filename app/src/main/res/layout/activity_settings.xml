@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".settingsActivity">
+
+
+    <Button
+        android:id="@+id/ignoredevices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add devices to ignore" />
+
+    <TextView
+        android:id="@+id/ignoreExplanation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tap this to add devices currently around you to the ignore list.  You can use this to prevent it from registering your own devices or family members as contacts." />
+
+    <Button
+        android:id="@+id/resetButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reset ignored devices" />
+
+    <TextView
+        android:id="@+id/resetExplanation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="This unignores all devies you previously added to the ignore list." />
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/exitButton"
+            android:layout_width="wrap_content"
+            android:layout_height="54dp"
+            android:text="Exit Settings"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="294dp" />
+    </android.support.constraint.ConstraintLayout>
+</LinearLayout>

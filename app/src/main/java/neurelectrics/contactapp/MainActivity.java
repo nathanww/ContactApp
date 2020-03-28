@@ -89,6 +89,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        //open the settings screen
+        final Button settingsButton = (Button) findViewById(R.id.settingsButton);
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.startActivity(new Intent(MainActivity.this, settingsActivity.class));
+            }
+        });
+
 //set up bluetooth
          checkLocationPermission(); //get permissions to use bt
 
