@@ -104,7 +104,15 @@ public class MainActivity extends AppCompatActivity {
 
 //set up bluetooth
          checkLocationPermission(); //get permissions to use bt
-
+        final BluetoothManager bluetoothManager =
+                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+        mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
+        settings = new ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .build();
+        filters = new ArrayList<ScanFilter>();
+        scanLeDevice(true);
 
 
         //update the screen with list of detected devices
@@ -116,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 String dispResult = "";
                 for (String i : results.keySet()) {
                     ScanResult temp = results.get(i);
-                    if (temp.getRssi() > -65 && isWearable(temp.getDevice())) {
+                    if (temp.getRssi() > -85) {
                         dispResult = dispResult + temp.getDevice().getAddress() + " : " + temp.getDevice().getName() + " " + temp.getRssi() + "\n";
                     }
                 }
@@ -129,6 +137,13 @@ public class MainActivity extends AppCompatActivity {
         };
 // start
         handler.postDelayed(updateLoop, 5000);
+    }
+
+
+    @Override
+    protected void onResume() { //start the scan when the application starts
+        super.onResume();
+
     }
 
     /*
