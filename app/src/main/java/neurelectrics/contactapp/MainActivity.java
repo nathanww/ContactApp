@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private ScanSettings settings;
     private List<ScanFilter> filters;
     private BluetoothGatt mGatt;
-
+    int LIST_THRESH = -65; //minimal signal strength to show up in the list
     //hashMap that stores bt device info index by address
     HashMap<String, ScanResult> results = new HashMap<String, ScanResult>();
 
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 String dispResult = "";
                 for (String i : results.keySet()) {
                     ScanResult temp = results.get(i);
-                    if (temp.getRssi() > -85) {
+                    if (temp.getRssi() > LIST_THRESH) {
                         dispResult = dispResult + temp.getDevice().getAddress() + " : " + temp.getDevice().getName() + " " + temp.getRssi() + "\n";
                     }
                 }
