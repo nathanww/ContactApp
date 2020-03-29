@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class settingsActivity extends AppCompatActivity {
@@ -39,7 +40,8 @@ public class settingsActivity extends AppCompatActivity {
                 }
                 editor.putString("ignoreDevices", ignoreDevices + prefs.getString("ignoreDevices", ""));
                 editor.commit();
-                Toast.makeText(getApplicationContext(), "Added " + devices + " beacons to ignore list", Toast.LENGTH_LONG);
+                TextView temp = (TextView) findViewById(R.id.ignored);
+                temp.setText("Added " + devices + " beacons to the ignore list");
                 Log.i("Ignoredevices", ignoreDevices);
             }
         });

@@ -21,10 +21,15 @@
         android:text="Add devices to ignore" />
 
     <TextView
+        android:id="@+id/ignored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
         android:id="@+id/resetExplanation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="This unignores all devies you previously added to the ignore list." />
+        android:text="This unignores all devices you previously added to the ignore list." />
 
     <Button
         android:id="@+id/resetButton"
