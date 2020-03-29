@@ -131,8 +131,10 @@ public class MainActivity extends AppCompatActivity {
                 // first update the total number of contacts today
                 SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
                 String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
-                contactsToday.setText("Exposure today: " + prefs.getInt(todayKey, 0));
+                contactsToday.setText("Today's exposure score: " + prefs.getInt(todayKey, 0));
                 chartView.loadUrl(generateChartString()); //update the chart
+
+                //show the devices contirbuting--this is not visible by default because the textView that holds it is set to GONE but can be turned pn
                 String dispResult = "";
                 for (String i : scanData.getInstance().getData().keySet()) {
                     ScanResult temp = scanData.getInstance().getData().get(i);

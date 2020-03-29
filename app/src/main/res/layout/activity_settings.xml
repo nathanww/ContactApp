@@ -8,12 +8,6 @@
     tools:context=".settingsActivity">
 
 
-    <Button
-        android:id="@+id/ignoredevices"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Add devices to ignore" />
-
     <TextView
         android:id="@+id/ignoreExplanation"
         android:layout_width="match_parent"
@@ -21,16 +15,22 @@
         android:text="Tap this to add devices currently around you to the ignore list.  You can use this to prevent it from registering your own devices or family members as contacts." />
 
     <Button
-        android:id="@+id/resetButton"
+        android:id="@+id/ignoredevices"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Reset ignored devices" />
+        android:text="Add devices to ignore" />
 
     <TextView
         android:id="@+id/resetExplanation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="This unignores all devies you previously added to the ignore list." />
+
+    <Button
+        android:id="@+id/resetButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reset ignored devices" />
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
