@@ -5,7 +5,7 @@ android {
     defaultConfig {
         applicationId "neurelectrics.contactapp"
         minSdkVersion 24
-        targetSdkVersion 27
+        targetSdkVersion 24
         versionCode 1
         versionName "1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
