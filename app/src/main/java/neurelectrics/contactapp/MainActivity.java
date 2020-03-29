@@ -93,12 +93,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //get the service status
         final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
         final SharedPreferences.Editor editor = prefs.edit();
 
 
-        final boolean serviceStatus= prefs.getBoolean("serviceRunning", false);
         //set up the exposure chart using quickchart.io to make the chart and Webview to display it
         final WebView chartView = (WebView) findViewById(R.id.chartView);
         chartView.setInitialScale(30);
