@@ -27,6 +27,11 @@
         android:layout_height="wrap_content"
         android:text="Waiting..." />
 
+    <WebView
+        android:id="@+id/chartView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -37,7 +42,8 @@
             android:layout_height="wrap_content"
             android:text="Settings"
             tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="396dp" />
+            tools:layout_editor_absoluteY="349dp" />
+
     </android.support.constraint.ConstraintLayout>
 
 
