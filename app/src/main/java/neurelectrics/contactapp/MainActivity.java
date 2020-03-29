@@ -99,6 +99,17 @@ public class MainActivity extends AppCompatActivity {
 
 
         final boolean serviceStatus= prefs.getBoolean("serviceRunning", false);
+        //set up the exposure chart using quickchart.io to make the chart and Webview to display it
+        final WebView chartView = (WebView) findViewById(R.id.chartView);
+        chartView.setInitialScale(30);
+        chartView.setBackgroundColor(Color.WHITE);
+        chartView.getSettings().setLoadWithOverviewMode(true); //set scaling to automatically fit the image returned by server
+        chartView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+        chartView.setScrollbarFadingEnabled(false);
+        chartView.getSettings().setUseWideViewPort(true);
+
+        chartView.loadUrl(generateChartString());
+
 
         //handle starting and stopping the service
         final Button startServiceButton = (Button)findViewById(R.id.startstop);
@@ -142,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
                 SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
                 String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
                 contactsToday.setText("Exposure today: " + prefs.getInt(todayKey, 0));
-
+                chartView.loadUrl(generateChartString()); //update the chart
                 String dispResult = "";
                 for (String i : scanData.getInstance().getData().keySet()) {
                     ScanResult temp = scanData.getInstance().getData().get(i);
@@ -152,24 +163,15 @@ public class MainActivity extends AppCompatActivity {
                 }
                 status.setText(dispResult);
 
-                handler.postDelayed(this, 5000);
+                handler.postDelayed(this, 10000);
 
             }
 
         };
 // start
-        handler.postDelayed(updateLoop, 5000);
+        handler.post(updateLoop);
 
-        //set up the exposure chart using quickchart.io to make the chart and Webview to display it
-        WebView chartView = (WebView) findViewById(R.id.chartView);
-        chartView.setInitialScale(30);
-        chartView.setBackgroundColor(Color.WHITE);
-        chartView.getSettings().setLoadWithOverviewMode(true); //set scaling to automatically fit the image returned by server
-        chartView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
-        chartView.setScrollbarFadingEnabled(false);
-        chartView.getSettings().setUseWideViewPort(true);
 
-        chartView.loadUrl(generateChartString());
     }
 
 
