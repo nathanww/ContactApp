@@ -49,7 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:text='ContactApp will learn which Bluetooth devices should not be counted as contacts (i.e. devices that belong to you or your family members). Go to each room where you live and press the "Add to ignore ist" button to add these devices. ' />
+            android:text='ContactApp will learn which Bluetooth devices should not be counted as contacts (i.e. devices that belong to you or your family members). Go to each room where you live and press the "Add to ignore list" button to add these devices. ' />
 
         <Button
             android:id="@+id/ignorebutton"
