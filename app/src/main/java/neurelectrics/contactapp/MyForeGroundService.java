@@ -42,6 +42,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.UUID;
 
 
@@ -150,10 +152,15 @@ public class MyForeGroundService extends Service {
                 int contactCount = contactsThisCycle.length() - contactsThisCycle.replace(" ", "").length(); //count the number of space-seperated addresses in the contact list
                 contactsThisCycle = ""; //reset the counter
                 SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
-                String todayKey = todayFormat.format(Calendar.getInstance().getTime());
+                SimpleDateFormat hourFormat = new SimpleDateFormat("hh-dd-MMM-yyyy");
+
+                String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
+                String hourKey = hourFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
                 final SharedPreferences.Editor editor = getSharedPreferences("com", MODE_PRIVATE).edit();
                 //get the total number of contacts today, add one, and write it back
                 editor.putInt(todayKey, getSharedPreferences("com", MODE_PRIVATE).getInt(todayKey, 0) + contactCount);
+                //also update the contacts this hour
+                editor.putInt(hourKey, getSharedPreferences("com", MODE_PRIVATE).getInt(hourKey, 0) + contactCount);
                 editor.apply();
                 handler.postDelayed(this, 30000);
 
