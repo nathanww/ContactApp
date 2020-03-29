@@ -152,7 +152,7 @@ public class MyForeGroundService extends Service {
                 int contactCount = contactsThisCycle.length() - contactsThisCycle.replace(" ", "").length(); //count the number of space-seperated addresses in the contact list
                 contactsThisCycle = ""; //reset the counter
                 SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
-                SimpleDateFormat hourFormat = new SimpleDateFormat("hh-dd-MMM-yyyy");
+                SimpleDateFormat hourFormat = new SimpleDateFormat("H-dd-MMM-yyyy");
 
                 String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
                 String hourKey = hourFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
