@@ -112,13 +112,13 @@ public class MyForeGroundService extends Service {
 
         // Make notification show big text.
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
-        bigTextStyle.setBigContentTitle("Tracking social distancing");
-        bigTextStyle.bigText("ContactApp is tracking your contacts.");
+        bigTextStyle.setBigContentTitle("Tracking exposure");
+        bigTextStyle.bigText("ContactApp is monitoring your exposure.");
         // Set big text style.
         builder.setStyle(bigTextStyle);
-        builder.setContentTitle("ContactApp is tracking your contacts.");
+        builder.setContentTitle("ContactApp is monitoring your exposure.");
         builder.setWhen(System.currentTimeMillis());
-        builder.setSmallIcon(R.drawable.sleepnotif);
+        builder.setSmallIcon(R.drawable.servicenotif);
         // Make the notification max priority.
         builder.setPriority(Notification.PRIORITY_MAX);
         builder.setContentIntent(pendingIntent);
