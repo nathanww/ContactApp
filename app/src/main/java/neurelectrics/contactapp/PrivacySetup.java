@@ -51,7 +51,7 @@ public class PrivacySetup extends AppCompatActivity {
                 editor.putString("ignoreDevices", ignoreDevices + prefs.getString("ignoreDevices", ""));
                 editor.commit();
                 TextView ignored = findViewById(R.id.ignoredcounter);
-                ignored.setText("Ignoring " + prefs.getString("ignoreDevices", "").split(" ").length + " devices");
+                ignored.setText("Ignoring " + prefs.getString("ignoreDevices", "").split(" ").length + " beacons");
                 Log.i("Ignoredevices", ignoreDevices);
                 TextView ask3 = (TextView) findViewById(R.id.ask3);
                 ask3.setVisibility(View.VISIBLE);
