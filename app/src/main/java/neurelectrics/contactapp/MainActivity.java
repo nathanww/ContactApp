@@ -111,23 +111,6 @@ public class MainActivity extends AppCompatActivity {
         chartView.loadUrl(generateChartString());
 
 
-        //handle starting and stopping the service
-        final Button startServiceButton = (Button)findViewById(R.id.startstop);
-
-
-        startServiceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean localstatus= prefs.getBoolean("serviceRunning", false);
-                Intent intent = new Intent(MainActivity.this, MyForeGroundService.class);
-
-                intent.setAction(MyForeGroundService.ACTION_START_FOREGROUND_SERVICE);
-                startService(intent);
-                //serviceStatus= !serviceStatus;
-                startServiceButton.invalidate();
-            }
-        });
-
 
         //open the settings screen
         final Button settingsButton = (Button) findViewById(R.id.settingsButton);
@@ -171,7 +154,10 @@ public class MainActivity extends AppCompatActivity {
 // start
         handler.post(updateLoop);
 
-
+//start the bluetooth search service
+        Intent intent = new Intent(MainActivity.this, MyForeGroundService.class);
+        intent.setAction(MyForeGroundService.ACTION_START_FOREGROUND_SERVICE);
+        startService(intent);
     }
 
 
