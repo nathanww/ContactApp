@@ -59,6 +59,7 @@ public class MyForeGroundService extends Service {
     private BluetoothGatt mGatt;
     private BluetoothAdapter mBluetoothAdapter;
     HashMap<String, ScanResult> scanResults = new HashMap<String, ScanResult>();
+    String contactsThisCycle = ""; //contacts that have been observed in a certain period of time
     int CONTACT_THRESH = -65; //signals closer than this count as a close contact
     public MyForeGroundService() {
     }
@@ -141,6 +142,28 @@ public class MyForeGroundService extends Service {
                 "ContactApp::BluetoothScan");
         wakeLock.acquire();
 
+        //compute the number of contacts every 30 seconds. This compensates for things like differences in bluetooth advertising rate.
+        final Handler handler = new Handler();
+        final Runnable updateLoop = new Runnable() {
+            @Override
+            public void run() {
+                int contactCount = contactsThisCycle.length() - contactsThisCycle.replace(" ", "").length(); //count the number of space-seperated addresses in the contact list
+                contactsThisCycle = ""; //reset the counter
+                SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
+                String todayKey = todayFormat.format(Calendar.getInstance().getTime());
+                final SharedPreferences.Editor editor = getSharedPreferences("com", MODE_PRIVATE).edit();
+                //get the total number of contacts today, add one, and write it back
+                editor.putInt(todayKey, getSharedPreferences("com", MODE_PRIVATE).getInt(todayKey, 0) + contactCount);
+                editor.apply();
+                handler.postDelayed(this, 30000);
+
+            }
+
+        };
+// start
+        handler.post(updateLoop);
+
+
     }
 
     private void scanLeDevice(final boolean enable) {
@@ -165,13 +188,11 @@ public class MyForeGroundService extends Service {
             if (result.getRssi() >= CONTACT_THRESH) {
                 //check if it is ignored
                 if (getSharedPreferences("com", MODE_PRIVATE).getString("ignoreDevices", "").indexOf(result.getDevice().getAddress()) == -1) {
-                    //not in the ignore list!
-                    SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
-                    String todayKey = todayFormat.format(Calendar.getInstance().getTime());
-                    final SharedPreferences.Editor editor = getSharedPreferences("com", MODE_PRIVATE).edit();
-                    //get the total number of contacts today, add one, and write it back
-                    editor.putInt(todayKey, getSharedPreferences("com", MODE_PRIVATE).getInt(todayKey, 0) + 1);
-                    editor.apply();
+                    //not in the ignore list, add it to the list of contacts observed this cycle
+                    if (contactsThisCycle.indexOf(result.getDevice().getAddress()) == -1) {
+                        contactsThisCycle = contactsThisCycle + result.getDevice().getAddress() + " ";
+                    }
+
                 }
 
             }
