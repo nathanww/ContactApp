@@ -119,8 +119,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//set up bluetooth
-         checkLocationPermission(); //get permissions to use bt
 
 
         //update the screen with list of detected devices
@@ -152,10 +150,15 @@ public class MainActivity extends AppCompatActivity {
 // start
         handler.post(updateLoop);
 
-//start the bluetooth search service
-        Intent intent = new Intent(MainActivity.this, MyForeGroundService.class);
-        intent.setAction(MyForeGroundService.ACTION_START_FOREGROUND_SERVICE);
-        startService(intent);
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//start the bluetooth search service, if we have the required location permission
+            Intent intent = new Intent(MainActivity.this, MyForeGroundService.class);
+            intent.setAction(MyForeGroundService.ACTION_START_FOREGROUND_SERVICE);
+            startService(intent);
+        } else { //otherwise this is probably the first run, so open the intro window
+            MainActivity.this.startActivity(new Intent(MainActivity.this, PrivacySetup.class));
+        }
     }
 
 

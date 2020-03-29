@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PrivacySetup">
+
+    <LinearLayout
+        android:layout_width="368dp"
+        android:layout_height="495dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="8dp">
+
+        <TextView
+            android:id="@+id/Introduction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thanks for using ContactApp! We have just a couple of setup steps." />
+
+        <TextView
+            android:id="@+id/header1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. Allow location permissions" />
+
+        <TextView
+            android:id="@+id/ask1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Android requires location permissions in order to scan for Bluetooth devices. This is because Bluetooth beacons can be used to locate you. ContactApp does not use or send any location information." />
+
+        <Button
+            android:id="@+id/locationButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Allow location access" />
+
+        <TextView
+            android:id="@+id/header2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2. Add devces to ignore"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/ask2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:text='ContactApp will learn which Bluetooth devices should not be counted as contacts (i.e. devices that belong to you or your family members). Go to each room where you live and press the "Add to ignore ist" button to add these devices. ' />
+
+        <Button
+            android:id="@+id/ignorebutton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add to ignore list"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/ignoredcounter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/ask3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:text="When you are done adding devices, tap below to complete setup" />
+
+        <Button
+            android:id="@+id/completebutton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:text="Complete setup" />
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>
