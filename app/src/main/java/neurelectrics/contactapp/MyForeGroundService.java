@@ -16,9 +16,7 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.AudioManager;
+
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -28,14 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.NotificationCompat;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.getpebble.android.kit.PebbleKit;
-import com.getpebble.android.kit.util.PebbleDictionary;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

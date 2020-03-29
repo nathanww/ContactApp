@@ -5,9 +5,9 @@ android {
     defaultConfig {
         applicationId "neurelectrics.contactapp"
         minSdkVersion 24
-        targetSdkVersion 24
-        versionCode 17
-        versionName "1.7"
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -27,6 +27,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    api 'com.getpebble:pebblekit:4.0.1@aar'
+
 
 }
