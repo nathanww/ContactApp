@@ -52,7 +52,7 @@ public class MyForeGroundService extends Service {
     private BluetoothAdapter mBluetoothAdapter;
     HashMap<String, ScanResult> scanResults = new HashMap<String, ScanResult>();
     String contactsThisCycle = ""; //contacts that have been observed in a certain period of time
-    int CONTACT_THRESH = -60; //signals closer than this count as a close contact
+    int CONTACT_THRESH = -50; //signals closer than this count as a close contact
     public MyForeGroundService() {
     }
 
