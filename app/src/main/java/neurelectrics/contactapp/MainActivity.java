@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             if (contactNum > -1) { //we actually have data for this slot
                 hourlyData = hourlyData + contactNum + ",";
                 hasValidData = true;
-            } else if (!hasValidData || true) {
+            } else if (!hasValidData) {
                 hourlyData = hourlyData + "0,";
             }
         }
