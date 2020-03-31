@@ -25,7 +25,7 @@ public class scanAndIgnore extends IntentService {
         final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
         final SharedPreferences.Editor editor = prefs.edit();
         String ignoreDevices = prefs.getString("ignoreDevices", "");
-        for (int run = 0; run < 60; run++) { //this makes it keep scanning for 1 minute in order to capture devices that don't broadcast that frequently
+        for (int run = 0; run < (60 * 20); run++) { //this makes it keep scanning for 20 minutes in order to capture devices that don't broadcast that frequently
             for (String i : scanData.getInstance().getData().keySet()) { //go through all the devices that have been found in the scan
                 ScanResult temp = scanData.getInstance().getData().get(i);
                 if (ignoreDevices.indexOf(temp.getDevice().getAddress() + " ") == -1) { //device is not already in the ignore list
