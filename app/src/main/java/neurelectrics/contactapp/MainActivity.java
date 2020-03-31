@@ -53,8 +53,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
-    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
-    private int REQUEST_ENABLE_BT = 1;
+
     private Handler mHandler;
 
     int LIST_THRESH = -65; //minimal signal strength to show up in the list
@@ -72,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
         boolean hasValidData = false; //if we have some valid data but not readings for a time preceding this, the time preceding will be set to zero to make the chart look nice. However data that has not been recorded yet is not plotted.
         for (int time = 0; time <= 23; time++) {
             int contactNum = prefs.getInt(time + "-" + todayKey, -1);
-            Log.i("contacthour", time + ", " + contactNum);
             if (contactNum > -1) { //we actually have data for this slot
                 hourlyData = hourlyData + contactNum + ",";
                 hasValidData = true;
