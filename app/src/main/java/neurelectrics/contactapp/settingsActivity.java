@@ -30,19 +30,10 @@ public class settingsActivity extends AppCompatActivity {
         ignoreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String ignoreDevices = "";
-                int devices = 0;
-                //when the button is clicked, start scanning for devices, save their addresses, and updated a sharedPref with the devices to be ignored
-                for (String i : scanData.getInstance().getData().keySet()) { //go through all the devices that have been found in the scan
-                    ScanResult temp = scanData.getInstance().getData().get(i);
-                    ignoreDevices = ignoreDevices + temp.getDevice().getAddress() + " ";
-                    devices++;
-                }
-                editor.putString("ignoreDevices", ignoreDevices + prefs.getString("ignoreDevices", ""));
-                editor.commit();
-                TextView temp = (TextView) findViewById(R.id.ignored);
-                temp.setText("Added " + devices + " beacons to the ignore list");
-                Log.i("Ignoredevices", ignoreDevices);
+                Intent ignoreIntent = new Intent(settingsActivity.this, scanAndIgnore.class);
+                startService(ignoreIntent);
+                ignoreButton.setText("Added nearby beacons to ignore list");
+                ignoreButton.setEnabled(false);
             }
         });
         //reset ignored devices
@@ -53,6 +44,8 @@ public class settingsActivity extends AppCompatActivity {
                 editor.putString("ignoreDevices", "");
                 editor.commit();
                 Toast.makeText(getApplicationContext(), "Ignored devices reset.", Toast.LENGTH_LONG);
+                ignoreButton.setText("Add devices to ignore");
+                ignoreButton.setEnabled(true);
             }
         });
 

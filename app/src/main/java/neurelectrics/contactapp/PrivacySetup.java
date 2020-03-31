@@ -38,21 +38,10 @@ public class PrivacySetup extends AppCompatActivity {
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
-                final SharedPreferences.Editor editor = prefs.edit();
-                String ignoreDevices = "";
-                int devices = 0;
-                //when the button is clicked, start scanning for devices, save their addresses, and updated a sharedPref with the devices to be ignored
-                for (String i : scanData.getInstance().getData().keySet()) { //go through all the devices that have been found in the scan
-                    ScanResult temp = scanData.getInstance().getData().get(i);
-                    ignoreDevices = ignoreDevices + temp.getDevice().getAddress() + " ";
-                    devices++;
-                }
-                editor.putString("ignoreDevices", ignoreDevices + prefs.getString("ignoreDevices", ""));
-                editor.commit();
-                TextView ignored = findViewById(R.id.ignoredcounter);
-                ignored.setText("Ignoring " + prefs.getString("ignoreDevices", "").split(" ").length + " beacons");
-                Log.i("Ignoredevices", ignoreDevices);
+                Intent ignoreIntent = new Intent(PrivacySetup.this, scanAndIgnore.class);
+                startService(ignoreIntent);
+                scanButton.setText("Added nearby beacons to ignore list");
+                scanButton.setEnabled(false);
                 TextView ask3 = (TextView) findViewById(R.id.ask3);
                 ask3.setVisibility(View.VISIBLE);
                 Button doneButton = (Button) findViewById(R.id.completebutton);
