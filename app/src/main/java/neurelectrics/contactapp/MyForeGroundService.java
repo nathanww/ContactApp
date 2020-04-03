@@ -2,6 +2,7 @@ package neurelectrics.contactapp;
 
 import android.app.ActivityManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -17,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -89,6 +91,8 @@ public class MyForeGroundService extends Service {
 
     /* Used to build and start foreground service. */
     private void startForegroundService() {
+        createNotificationChannel(); //creates the required channel on newer platforms
+
         final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean("serviceRunning",true);
@@ -98,7 +102,7 @@ public class MyForeGroundService extends Service {
         Intent intent = new Intent(this,MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
         // Create notification builder.
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "contactapp");
 
         // Make notification show big text.
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
@@ -207,6 +211,19 @@ public class MyForeGroundService extends Service {
         // Stop the foreground service.
         stopSelf();
     }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel channel = new NotificationChannel("contactapp", "ContactApp notification", importance);
+            channel.setDescription("Contactapp persistent notification");
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
 
 
 }
