@@ -66,15 +66,15 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
         String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
         final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
-
+        SimpleDateFormat hourFormat = new SimpleDateFormat("H");
+        int thisHour = Integer.parseInt(hourFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime())); //todo: clearer way of getting current hour
         //go through each hour of the day and append teh number of contacts to hourlydata.
-        boolean hasValidData = false; //if we have some valid data but not readings for a time preceding this, the time preceding will be set to zero to make the chart look nice. However data that has not been recorded yet is not plotted.
-        for (int time = 0; time <= 23; time++) {
+        // We want to plot points for all the hours that have actually happened. Some might be missing data (if the app wasn't running), so show these as 0
+        for (int time = 0; time <= thisHour; time++) {
             int contactNum = prefs.getInt(time + "-" + todayKey, -1);
             if (contactNum > -1) { //we actually have data for this slot
                 hourlyData = hourlyData + contactNum + ",";
-                hasValidData = true;
-            } else if (!hasValidData) {
+            } else {
                 hourlyData = hourlyData + "0,";
             }
         }
