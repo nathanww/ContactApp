@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     int LIST_THRESH = -65; //minimal signal strength to show up in the list
     //hashMap that stores bt device info index by address
     HashMap<String, ScanResult> results = new HashMap<String, ScanResult>();
-
+    boolean isVisible = false; //keep trck of whether this activity is in the foreground
     String generateChartString() { //format the hourly exposure data into a format that can be sent to quickchart.
         String BASE_REQUEST = "https://quickchart.io/chart?c={type:%27line%27,%20options:%20{legend:%20{display:%20false}},data:{labels:[%2712%20AM%27,%271%20AM%27,%272%20AM%27,%273%20AM%27,%274%20AM%27,%275%20AM%27,%276%20AM%27,%277%20AM%27,%278%20AM%27,%279%20AM%27,%2710%20AM%27,%2711%20AM%27,%2712%20PM%27,%20%271%20PM%27,%272%20PM%27,%273%20PM%27,%274%20PM%27,%275%20PM%27,%276%20PM%27,%277%20PM%27,%278%20PM%27,%279%20PM%27,%2710%20PM%27,%2711%20PM%27],%20datasets:[{label:%27%27,%20data:%20[#CHARTDATA#],%20fill:false,borderColor:%27blue%27}]}}";
         String hourlyData = "";
@@ -106,9 +106,6 @@ public class MainActivity extends AppCompatActivity {
         chartView.setScrollbarFadingEnabled(false);
         chartView.getSettings().setUseWideViewPort(true);
 
-        chartView.loadUrl(generateChartString());
-
-
         //open the settings screen
         final Button settingsButton = (Button) findViewById(R.id.settingsButton);
         settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -130,7 +127,9 @@ public class MainActivity extends AppCompatActivity {
                 SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
                 String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
                 contactsToday.setText("Today's exposure score: " + prefs.getInt(todayKey, 0));
-                chartView.loadUrl(generateChartString()); //update the chart
+                if (isVisible) {
+                    chartView.loadUrl(generateChartString()); //update the chart
+                }
 
                 //show the devices contirbuting--this is not visible by default because the textView that holds it is set to GONE but can be turned pn
                 String dispResult = "";
@@ -142,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 status.setText(dispResult);
 
-                handler.postDelayed(this, 10000);
+                handler.postDelayed(this, 30000);
 
             }
 
@@ -165,7 +164,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() { //start the scan when the application starts
         super.onResume();
+        isVisible = true; //the app is visible
+    }
 
+    @Override
+    protected void onPause() { //start the scan when the application starts
+        super.onPause();
+        isVisible = false; //the app is no longer visible
     }
 
 
