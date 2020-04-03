@@ -32,8 +32,9 @@ public class scanAndIgnore extends IntentService {
                     ignoreDevices = ignoreDevices + temp.getDevice().getAddress() + " ";
                 }
 
+
             }
-            editor.putString("ignoreDevices", ignoreDevices + prefs.getString("ignoreDevices", ""));
+            editor.putString("ignoreDevices", ignoreDevices);
             editor.commit();
             SystemClock.sleep(1000); //wait one second
         }
