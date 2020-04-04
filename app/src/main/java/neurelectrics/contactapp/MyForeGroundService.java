@@ -53,8 +53,17 @@ public class MyForeGroundService extends Service {
     private BluetoothGatt mGatt;
     private BluetoothAdapter mBluetoothAdapter;
     HashMap<String, ScanResult> scanResults = new HashMap<String, ScanResult>();
+    HashMap<Long, ScanResult> contactList = new HashMap<Long, ScanResult>(); //stores contacts indexed by time, for suppressing contacts after they've been detected too much
     String contactsThisCycle = ""; //contacts that have been observed in a certain period of time
-    int CONTACT_THRESH = -60; //signals closer than this count as a close contact
+    int CONTACT_THRESH = -65; //signals closer than this count as a close contact
+    //these settings control how contacts stop "counting" once they have been observed for a certain period of time.
+    //This makes the score more interpretable because long lasting contacts are often things that just happen to be in the vicinity and don't represent "real" contacts
+    //contact_list time is how long the system keeps track of contacts, and contact list max in the number of 30-second periods in which they must be
+    //observed before they stop counting.
+
+    long CONTACT_LIST_TIME = 1000 * 60 * 15; //number of ms contacts on the list should be kept for
+    int CONTACT_LIST_MAX = 20; //start disregarding signals if they appear in more than this many scans
+    String signalsThisCycle = ""; //signals of any strength that have already been encountered in the current scan
     public MyForeGroundService() {
     }
 
@@ -145,6 +154,7 @@ public class MyForeGroundService extends Service {
             public void run() {
                 int contactCount = contactsThisCycle.length() - contactsThisCycle.replace(" ", "").length(); //count the number of space-seperated addresses in the contact list
                 contactsThisCycle = ""; //reset the counter
+                signalsThisCycle = ""; //same for all signals
                 SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
                 SimpleDateFormat hourFormat = new SimpleDateFormat("H-dd-MMM-yyyy");
 
@@ -156,6 +166,10 @@ public class MyForeGroundService extends Service {
                 //also update the contacts this hour
                 editor.putInt(hourKey, getSharedPreferences("com", MODE_PRIVATE).getInt(hourKey, 0) + contactCount);
                 editor.apply();
+
+
+                cleanContactList(); //clean out old contacts from the contact list once they expire
+
                 handler.postDelayed(this, 30000);
 
             }
@@ -184,13 +198,17 @@ public class MyForeGroundService extends Service {
         public void onScanResult(int callbackType, ScanResult result) {
             scanResults.put(result.getDevice().getAddress(), result);
             scanData.getInstance().setData(scanResults);
+            if (signalsThisCycle.indexOf(result.getDevice().getAddress()) == -1) { //if this device has not been seen this cycle, add it to the list regardless of signal strength
+                signalsThisCycle = signalsThisCycle + result.getDevice().getAddress() + " ";
+                contactList.put(new Long(System.currentTimeMillis()), result);
+            }
 
             //check to see if this is a contact
             if (result.getRssi() >= CONTACT_THRESH) {
                 //check if it is ignored
                 if (getSharedPreferences("com", MODE_PRIVATE).getString("ignoreDevices", "").indexOf(result.getDevice().getAddress()) == -1) {
-                    //not in the ignore list, add it to the list of contacts observed this cycle
-                    if (contactsThisCycle.indexOf(result.getDevice().getAddress()) == -1) {
+                    //check the ignore list, and also the number of times this contact has been observed in the contact list. If it's not in the ignore list and hasn't been observed too much, add it to the contact list
+                    if (contactsThisCycle.indexOf(result.getDevice().getAddress()) == -1 && countContacts(result.getDevice().getAddress()) < CONTACT_LIST_MAX) {
                         contactsThisCycle = contactsThisCycle + result.getDevice().getAddress() + " ";
                     }
 
@@ -210,6 +228,26 @@ public class MyForeGroundService extends Service {
 
         // Stop the foreground service.
         stopSelf();
+    }
+
+    private void cleanContactList() { //remove any entries in contact list that are too old as defined by the CONTACT_LIST_TIME variable
+        for (Long i : contactList.keySet()) {
+            if (i < System.currentTimeMillis() - CONTACT_LIST_TIME) {
+                contactList.remove(i);
+            }
+        }
+
+    }
+
+
+    private int countContacts(String deviceid) { //count the number of contacts from this device
+        int hits = 0;
+        for (Long i : contactList.keySet()) {
+            if (contactList.get(i).getDevice().getAddress().equals(deviceid)) {
+                hits++;
+            }
+        }
+        return hits;
     }
 
     private void createNotificationChannel() {

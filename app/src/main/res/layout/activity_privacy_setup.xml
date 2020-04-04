@@ -41,7 +41,7 @@
             android:id="@+id/header2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="2. Add devces to ignore"
+            android:text="2. Add devices to ignore"
             android:visibility="gone" />
 
         <TextView
@@ -49,7 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:text='ContactApp will learn which Bluetooth devices should not be counted as contacts (i.e. devices that belong to you or your family members). Press the "add to ingore list" button and then walk around your house or office. ' />
+            android:text='ContactApp will learn which Bluetooth devices should not be counted as contacts (i.e. devices that belong to you or your family members). Press the "add to ignore list" button and then walk around your house or office. ' />
 
         <Button
             android:id="@+id/ignorebutton"
