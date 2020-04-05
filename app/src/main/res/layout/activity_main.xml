@@ -22,6 +22,42 @@
         android:text="Waiting..."
         android:visibility="gone" />
 
+    <TextView
+        android:id="@+id/graphText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show graph for"
+        android:textAlignment="textStart"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/viewOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/viewHour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="This hour" />
+
+        <Button
+            android:id="@+id/viewDay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Today" />
+
+        <Button
+            android:id="@+id/viewWeek"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="This week" />
+    </LinearLayout>
+
     <WebView
         android:id="@+id/chartView"
         android:layout_width="match_parent"

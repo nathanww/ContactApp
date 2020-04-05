@@ -62,7 +62,7 @@ public class MyForeGroundService extends Service {
     //observed before they stop counting.
 
     long CONTACT_LIST_TIME = 1000 * 60 * 15; //number of ms contacts on the list should be kept for
-    int CONTACT_LIST_MAX = 20; //start disregarding signals if they appear in more than this many scans
+    int CONTACT_LIST_MAX = 2; //start disregarding signals if they appear in more than this many scans
     String signalsThisCycle = ""; //signals of any strength that have already been encountered in the current scan
     public MyForeGroundService() {
     }
@@ -160,11 +160,25 @@ public class MyForeGroundService extends Service {
 
                 String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
                 String hourKey = hourFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
+
+
+                //formats and keys for weekly and hourly graphs
+                SimpleDateFormat weekdayFormat = new SimpleDateFormat("u-dd-MMM-yyyy");
+                String weekdayKey = "week-" + weekdayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
+                SimpleDateFormat minuteFormat = new SimpleDateFormat("m-H-dd-MMM-yyyy");
+                String minuteKey = "min-" + minuteFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
+                Log.i("weekformatset", weekdayKey);
+
                 final SharedPreferences.Editor editor = getSharedPreferences("com", MODE_PRIVATE).edit();
                 //get the total number of contacts today, add one, and write it back
                 editor.putInt(todayKey, getSharedPreferences("com", MODE_PRIVATE).getInt(todayKey, 0) + contactCount);
                 //also update the contacts this hour
                 editor.putInt(hourKey, getSharedPreferences("com", MODE_PRIVATE).getInt(hourKey, 0) + contactCount);
+
+
+                //update contacts for this minute and contacts for this day
+                editor.putInt(minuteKey, getSharedPreferences("com", MODE_PRIVATE).getInt(minuteKey, 0) + contactCount);
+                editor.putInt(weekdayKey, getSharedPreferences("com", MODE_PRIVATE).getInt(weekdayKey, 0) + contactCount);
                 editor.apply();
 
 
