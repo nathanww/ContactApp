@@ -14,8 +14,10 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 
 import android.os.Build;
@@ -56,6 +58,7 @@ public class MyForeGroundService extends Service {
     HashMap<Long, ScanResult> contactList = new HashMap<Long, ScanResult>(); //stores contacts indexed by time, for suppressing contacts after they've been detected too much
     String contactsThisCycle = ""; //contacts that have been observed in a certain period of time
     int CONTACT_THRESH = -65; //signals closer than this count as a close contact
+    BroadcastReceiver plugged = new pluggedIn();
     //these settings control how contacts stop "counting" once they have been observed for a certain period of time.
     //This makes the score more interpretable because long lasting contacts are often things that just happen to be in the vicinity and don't represent "real" contacts
     //contact_list time is how long the system keeps track of contacts, and contact list max in the number of 30-second periods in which they must be
@@ -77,6 +80,17 @@ public class MyForeGroundService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG_FOREGROUND_SERVICE, "foreground service onCreate().");
+
+        IntentFilter filter = new IntentFilter(Intent.ACTION_POWER_CONNECTED);
+        this.registerReceiver(plugged, filter);
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        this.unregisterReceiver(plugged);
+
     }
 
     @Override
