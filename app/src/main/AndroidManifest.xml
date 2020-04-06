@@ -53,7 +53,12 @@
 
         <service
             android:name=".scanAndIgnore"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <receiver
+            android:name=".pluggedIn"
+            android:enabled="true"
+            android:exported="true"></receiver>
     </application>
 
 </manifest>

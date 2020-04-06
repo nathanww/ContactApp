@@ -39,6 +39,7 @@ public class PrivacySetup extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent ignoreIntent = new Intent(PrivacySetup.this, scanAndIgnore.class);
+                ignoreIntent.putExtra("timeToRun", 60);
                 startService(ignoreIntent);
                 scanButton.setText("Added nearby beacons to ignore list");
                 scanButton.setEnabled(false);

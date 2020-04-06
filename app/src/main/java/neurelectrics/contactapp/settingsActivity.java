@@ -31,6 +31,7 @@ public class settingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent ignoreIntent = new Intent(settingsActivity.this, scanAndIgnore.class);
+                ignoreIntent.putExtra("timeToRun", 60);
                 startService(ignoreIntent);
                 ignoreButton.setText("Added nearby beacons to ignore list");
                 ignoreButton.setEnabled(false);

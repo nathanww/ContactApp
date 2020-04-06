@@ -61,8 +61,8 @@ public class MyForeGroundService extends Service {
     //contact_list time is how long the system keeps track of contacts, and contact list max in the number of 30-second periods in which they must be
     //observed before they stop counting.
 
-    long CONTACT_LIST_TIME = 1000 * 60 * 120; //number of ms contacts on the list should be kept for
-    int CONTACT_LIST_MAX = 5; //start disregarding signals if they appear in more than this many scans
+    long CONTACT_LIST_TIME = 1000 * 60 * (60 * 6); //number of ms contacts on the list should be kept for
+    int CONTACT_LIST_MAX = 2; //start disregarding signals if they appear in more than this many scans
     String signalsThisCycle = ""; //signals of any strength that have already been encountered in the current scan
     public MyForeGroundService() {
     }
@@ -212,13 +212,16 @@ public class MyForeGroundService extends Service {
         public void onScanResult(int callbackType, ScanResult result) {
             scanResults.put(result.getDevice().getAddress(), result);
             scanData.getInstance().setData(scanResults);
-            if (signalsThisCycle.indexOf(result.getDevice().getAddress()) == -1) { //if this device has not been seen this cycle, add it to the list regardless of signal strength
-                signalsThisCycle = signalsThisCycle + result.getDevice().getAddress() + " ";
-                contactList.put(new Long(System.currentTimeMillis()), result);
-            }
+
 
             //check to see if this is a contact
             if (result.getRssi() >= CONTACT_THRESH) {
+
+                if (signalsThisCycle.indexOf(result.getDevice().getAddress()) == -1) { //if this device has not been seen this cycle, add it to the list regardless of signal strength
+                    signalsThisCycle = signalsThisCycle + result.getDevice().getAddress() + " ";
+                    contactList.put(new Long(System.currentTimeMillis()), result);
+                }
+
                 //check if it is ignored
                 if (getSharedPreferences("com", MODE_PRIVATE).getString("ignoreDevices", "").indexOf(result.getDevice().getAddress()) == -1) {
                     //check the ignore list, and also the number of times this contact has been observed in the contact list. If it's not in the ignore list and hasn't been observed too much, add it to the contact list
