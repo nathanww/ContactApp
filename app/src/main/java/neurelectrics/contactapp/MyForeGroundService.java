@@ -61,8 +61,8 @@ public class MyForeGroundService extends Service {
     //contact_list time is how long the system keeps track of contacts, and contact list max in the number of 30-second periods in which they must be
     //observed before they stop counting.
 
-    long CONTACT_LIST_TIME = 1000 * 60 * 15; //number of ms contacts on the list should be kept for
-    int CONTACT_LIST_MAX = 2; //start disregarding signals if they appear in more than this many scans
+    long CONTACT_LIST_TIME = 1000 * 60 * 120; //number of ms contacts on the list should be kept for
+    int CONTACT_LIST_MAX = 5; //start disregarding signals if they appear in more than this many scans
     String signalsThisCycle = ""; //signals of any strength that have already been encountered in the current scan
     public MyForeGroundService() {
     }
