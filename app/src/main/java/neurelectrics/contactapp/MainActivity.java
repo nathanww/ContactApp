@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         //formats and keys
         SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
         String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
-        SimpleDateFormat weekdayFormat = new SimpleDateFormat("-dd-MMM-yyyy");
+        SimpleDateFormat weekdayFormat = new SimpleDateFormat("-W-MMM-yyyy");
         String weekdayKey = weekdayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
         SimpleDateFormat minuteFormat = new SimpleDateFormat("-H-dd-MMM-yyyy");
         String minuteKey = minuteFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());

@@ -177,7 +177,7 @@ public class MyForeGroundService extends Service {
 
 
                 //formats and keys for weekly and hourly graphs
-                SimpleDateFormat weekdayFormat = new SimpleDateFormat("u-dd-MMM-yyyy");
+                SimpleDateFormat weekdayFormat = new SimpleDateFormat("u-W-MMM-yyyy");
                 String weekdayKey = "week-" + weekdayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
                 SimpleDateFormat minuteFormat = new SimpleDateFormat("m-H-dd-MMM-yyyy");
                 String minuteKey = "min-" + minuteFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
