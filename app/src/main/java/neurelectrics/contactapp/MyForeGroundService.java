@@ -59,6 +59,7 @@ public class MyForeGroundService extends Service {
     String contactsThisCycle = ""; //contacts that have been observed in a certain period of time
     int CONTACT_THRESH = -65; //signals closer than this count as a close contact
     BroadcastReceiver plugged = new pluggedIn();
+    boolean isRunning = false; //flag for whether the service si running or not
     //these settings control how contacts stop "counting" once they have been observed for a certain period of time.
     //This makes the score more interpretable because long lasting contacts are often things that just happen to be in the vicinity and don't represent "real" contacts
     //contact_list time is how long the system keeps track of contacts, and contact list max in the number of 30-second periods in which they must be
@@ -102,8 +103,12 @@ public class MyForeGroundService extends Service {
             switch (action)
             {
                 case ACTION_START_FOREGROUND_SERVICE:
-                    startForegroundService();
+                    if (!isRunning) {
+                        startForegroundService();
+                        isRunning = true;
+                    }
                     break;
+
                 case ACTION_STOP_FOREGROUND_SERVICE:
                     stopForegroundService();
                     break;
