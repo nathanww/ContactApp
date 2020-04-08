@@ -8,9 +8,9 @@ public class pluggedIn extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        /*
+
         Intent ignoreIntent = new Intent(context, scanAndIgnore.class);
         ignoreIntent.putExtra("timeToRun", 15);
-        context.startService(ignoreIntent);*/
+        context.startService(ignoreIntent);
     }
 }
