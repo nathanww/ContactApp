@@ -96,6 +96,7 @@ public class MyForeGroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
         if(intent != null)
         {
             String action = intent.getAction();
@@ -114,7 +115,7 @@ public class MyForeGroundService extends Service {
                     break;
             }
         }
-        return super.onStartCommand(intent, flags, startId);
+        return START_REDELIVER_INTENT; //makes this a "sticky" service which will restart itself if killed due to lack of memory. Redeliver intent means it will get the same START_FOREGROUND_SERVICE intent.
     }
 
     /* Used to build and start foreground service. */
