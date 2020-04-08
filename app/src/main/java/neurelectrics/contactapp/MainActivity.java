@@ -257,6 +257,11 @@ public class MainActivity extends AppCompatActivity {
         isVisible = false; //the app is no longer visible
     }
 
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        finish();
+    }
 
 }
 
