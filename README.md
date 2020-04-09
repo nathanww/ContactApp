@@ -1,9 +1,12 @@
 # ContactApp
-Bluetooth-based social distancing tracker and contact tracer
-ContactApp is an Android app which uses Bluetooth to quantify and identify close contacts, in order to help people and health agencies implement social distancing more effectively.
+ContactApp uses Bluetooth proximity measurements, in order to help people and health agencies implement social distancing more effectively. It helps individuals identify which activites pose the most risk and help *health departments* monitor the overall impact of social distancing policies.
 
-ContactApp can provide *feedback* to individuals on which environments present the most risk and help *health departments* monitor the overall impact of social distancing policies.
 
+## Download
+Right now the best way to download ContactApp is directly through GitHub [here](https://github.com/nathanww/ContactApp/raw/master/app-release.apk).  You will probably need to enable apps from [unknown sources](https://www.technipages.com/where-did-allow-installation-from-unknown-sources-go-in-android) first. (We are working to get the App in the Play store, but Google's review process is severely slowed by the pandemic)
+
+
+![Screenshot](screenshot2.png?raw=true)
 ## Inspiration
 
 A challenge in implementing social distancing is that it is difficult to understand how epidemiological goals (“reduce contact by 75%”) translate into recommendations (“Is it OK to go for a walk? Should I take the train?”).   This uncertainty can lead to noncompliance, for instance if people believe that going to a park does not pose a risk.
