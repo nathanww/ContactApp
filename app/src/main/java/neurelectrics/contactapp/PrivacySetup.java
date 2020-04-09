@@ -57,13 +57,7 @@ public class PrivacySetup extends AppCompatActivity {
         completeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
-                final SharedPreferences.Editor editor = prefs.edit();
-                CheckBox broadcast = (CheckBox) findViewById(R.id.broadcastOK);
-                editor.putBoolean("broadcastOK", broadcast.isChecked());
-                editor.commit();
                 finish();
-
             }
         });
     }

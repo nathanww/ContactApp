@@ -58,13 +58,6 @@
             android:text="Add to ignore list"
             android:visibility="gone" />
 
-        <CheckBox
-            android:id="@+id/broadcastOK"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="Allow ContactApp to broadcast an anonymous radio beacon from your phone? If you are sick, this may help health authorities locate people you have been in contact with." />
-
         <TextView
             android:id="@+id/ignoredcounter"
             android:layout_width="match_parent"
