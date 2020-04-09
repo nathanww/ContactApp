@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -157,6 +158,21 @@ public class MyForeGroundService extends Service {
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) { //check to make sure the Bluetooth is working, if not try to enable it.
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            enableBtIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); //Request Bluetooth on
+            startActivity(enableBtIntent);
+        }
+        int waitTime = 60;
+        while (waitTime > 0 && (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled())) { //wait one minute for user to turn on buetooth, if it is not on by then abort.
+            waitTime--;
+            SystemClock.sleep(1000);
+        }
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) { //permission was not granted, abort the service
+            isRunning = false;
+            stopForegroundService();
+        }
+
         mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
         settings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
