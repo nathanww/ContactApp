@@ -5,7 +5,7 @@ ContactApp uses Bluetooth proximity measurements, in order to help people and he
 ## Download
 Right now the best way to download ContactApp is through Google Play [here](https://play.google.com/store/apps/details?id=neurelectrics.contactapp).  
 
-You can also install the app-release.apk file from this repository, but you will probably need to enable apps from [unknown sources](https://www.technipages.com/where-did-allow-installation-from-unknown-sources-go-in-android) to install it this way. 
+Google play is very slow to update, so if yo want the latest version you can install the app-release.apk file from this repository. You will probably need to enable apps from [unknown sources](https://www.technipages.com/where-did-allow-installation-from-unknown-sources-go-in-android) to install it this way. 
 
 
 ![Screenshot](screenshot2.png?raw=true)
