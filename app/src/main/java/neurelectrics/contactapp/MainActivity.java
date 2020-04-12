@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler mHandler;
 
-    int LIST_THRESH = -65; //minimal signal strength to show up in the list
+    int LIST_THRESH = -60; //minimal signal strength to show up in the list
     //hashMap that stores bt device info index by address
     HashMap<String, ScanResult> results = new HashMap<String, ScanResult>();
     boolean isVisible = false; //keep trck of whether this activity is in the foreground

@@ -58,7 +58,7 @@ public class MyForeGroundService extends Service {
     HashMap<String, ScanResult> scanResults = new HashMap<String, ScanResult>();
     HashMap<Long, ScanResult> contactList = new HashMap<Long, ScanResult>(); //stores contacts indexed by time, for suppressing contacts after they've been detected too much
     String contactsThisCycle = ""; //contacts that have been observed in a certain period of time
-    int CONTACT_THRESH = -65; //signals closer than this count as a close contact
+    int CONTACT_THRESH = -60; //signals closer than this count as a close contact
     BroadcastReceiver plugged = new pluggedIn();
     boolean isRunning = false; //flag for whether the service si running or not
     //these settings control how contacts stop "counting" once they have been observed for a certain period of time.
@@ -176,6 +176,7 @@ public class MyForeGroundService extends Service {
         mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
         settings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .setMatchMode(ScanSettings.MATCH_MODE_STICKY) //sticky match mode should hekp filter out "stray" contacts with unusually high signal strength
                 .build();
         filters = new ArrayList<ScanFilter>();
         scanLeDevice(true);
