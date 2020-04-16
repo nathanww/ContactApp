@@ -58,7 +58,7 @@ public class MyForeGroundService extends Service {
     HashMap<String, ScanResult> scanResults = new HashMap<String, ScanResult>();
     HashMap<Long, ScanResult> contactList = new HashMap<Long, ScanResult>(); //stores contacts indexed by time, for suppressing contacts after they've been detected too much
     String contactsThisCycle = ""; //contacts that have been observed in a certain period of time
-    int CONTACT_THRESH = -60; //signals closer than this count as a close contact
+    int CONTACT_THRESH = -65; //signals closer than this count as a close contact
     BroadcastReceiver plugged = new pluggedIn();
     boolean isRunning = false; //flag for whether the service si running or not
     //these settings control how contacts stop "counting" once they have been observed for a certain period of time.
@@ -67,7 +67,7 @@ public class MyForeGroundService extends Service {
     //observed before they stop counting.
 
     long CONTACT_LIST_TIME = 1000 * 60 * (60 * 24); //number of ms contacts on the list should be kept for
-    int CONTACT_LIST_MAX = 10; //start disregarding signals if they appear in more than this many scans
+    int CONTACT_LIST_MAX = 1; //start disregarding signals if they appear in more than this many scans
     String signalsThisCycle = ""; //signals of any strength that have already been encountered in the current scan
     public MyForeGroundService() {
     }
@@ -175,9 +175,7 @@ public class MyForeGroundService extends Service {
 
         mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
         settings = new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .setMatchMode(ScanSettings.MATCH_MODE_STICKY) //sticky match mode should hekp filter out "stray" contacts with unusually high signal strength
-                .build();
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
         filters = new ArrayList<ScanFilter>();
         scanLeDevice(true);
 
@@ -252,10 +250,7 @@ public class MyForeGroundService extends Service {
         public void onScanResult(int callbackType, ScanResult result) {
             scanResults.put(result.getDevice().getAddress(), result);
             scanData.getInstance().setData(scanResults);
-            if (signalsThisCycle.indexOf(result.getDevice().getAddress()) == -1) { //if this device has not been seen this cycle, add it to the list regardless of signal strength
-                signalsThisCycle = signalsThisCycle + result.getDevice().getAddress() + " ";
-                contactList.put(new Long(System.currentTimeMillis()), result);
-            }
+
 
             //check to see if this is a contact
             if (result.getRssi() >= CONTACT_THRESH) {
@@ -266,6 +261,10 @@ public class MyForeGroundService extends Service {
                     //check the ignore list, and also the number of times this contact has been observed in the contact list. If it's not in the ignore list and hasn't been observed too much, add it to the contact list
                     if (contactsThisCycle.indexOf(result.getDevice().getAddress()) == -1 && countContacts(result.getDevice().getAddress()) < CONTACT_LIST_MAX) {
                         contactsThisCycle = contactsThisCycle + result.getDevice().getAddress() + " ";
+                    }
+                    if (signalsThisCycle.indexOf(result.getDevice().getAddress()) == -1) { //if this device has not been seen this cycle, add it to the list regardless of signal strength
+                        signalsThisCycle = signalsThisCycle + result.getDevice().getAddress() + " ";
+                        contactList.put(new Long(System.currentTimeMillis()), result);
                     }
 
                 }
