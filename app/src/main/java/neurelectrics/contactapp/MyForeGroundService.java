@@ -37,6 +37,7 @@ import com.google.gson.Gson;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -298,19 +299,23 @@ public class MyForeGroundService extends Service {
     }
 
     private void cleanContactList() { //remove any entries in contact list that are too old as defined by the CONTACT_LIST_TIME variable
-        for (Long i : contactList.keySet()) {
-            if (i < System.currentTimeMillis() - CONTACT_LIST_TIME) {
-                contactList.remove(i);
+        try {
+            for (Long i : contactList.keySet()) {
+                if (i < System.currentTimeMillis() - CONTACT_LIST_TIME) {
+                    contactList.remove(i);
+                }
             }
+            //write the contactList back to storage
+            final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE); //local sharedprefs
+            final SharedPreferences.Editor editor = prefs.edit();
+            //now convert contactList to a josn
+            Gson gson = new Gson();
+            String json = gson.toJson(contactList);
+            editor.putBoolean("hasContacts", true);
+            editor.putString("contactList", json);
+        } catch (ConcurrentModificationException e) { //if these lists are already being modified, back off--we'll clean the contact list 30s later.
+
         }
-        //write the contactList back to storage
-        final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE); //local sharedprefs
-        final SharedPreferences.Editor editor = prefs.edit();
-        //now convert contactList to a josn
-        Gson gson = new Gson();
-        String json = gson.toJson(contactList);
-        editor.putBoolean("hasContacts", true);
-        editor.putString("contactList", json);
     }
 
 
