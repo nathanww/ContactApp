@@ -32,6 +32,8 @@ import android.widget.Toast;
 import android.support.v4.app.NotificationCompat;
 
 
+import com.google.gson.Gson;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -153,7 +155,16 @@ public class MyForeGroundService extends Service {
         Notification notification = builder.build();
         // Start foreground service.
         startForeground(1, notification);
+        //ContactList stores contacts over the last 24 hours for "adaptation" (i.e. so persistent contacts like refrigerators don't keep
+        //inflating the score
 
+        //if a contactList already exists load it from storage, otherwise we can use the blank one
+
+        if (prefs.getBoolean("hasContacts", false)) {
+            Gson gson = new Gson();
+            String json = prefs.getString("contactList", "");
+            contactList = gson.fromJson(json, HashMap.class);
+        }
         //start Bluetooth
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -250,7 +261,7 @@ public class MyForeGroundService extends Service {
         public void onScanResult(int callbackType, ScanResult result) {
             scanResults.put(result.getDevice().getAddress(), result);
             scanData.getInstance().setData(scanResults);
-
+            Log.e("contact", result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower());
 
             //check to see if this is a contact
             if (result.getRssi() >= CONTACT_THRESH) {
@@ -261,6 +272,7 @@ public class MyForeGroundService extends Service {
                     //check the ignore list, and also the number of times this contact has been observed in the contact list. If it's not in the ignore list and hasn't been observed too much, add it to the contact list
                     if (contactsThisCycle.indexOf(result.getDevice().getAddress()) == -1 && countContacts(result.getDevice().getAddress()) < CONTACT_LIST_MAX) {
                         contactsThisCycle = contactsThisCycle + result.getDevice().getAddress() + " ";
+
                     }
                     if (signalsThisCycle.indexOf(result.getDevice().getAddress()) == -1) { //if this device has not been seen this cycle, add it to the list regardless of signal strength
                         signalsThisCycle = signalsThisCycle + result.getDevice().getAddress() + " ";
@@ -291,7 +303,14 @@ public class MyForeGroundService extends Service {
                 contactList.remove(i);
             }
         }
-
+        //write the contactList back to storage
+        final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE); //local sharedprefs
+        final SharedPreferences.Editor editor = prefs.edit();
+        //now convert contactList to a josn
+        Gson gson = new Gson();
+        String json = gson.toJson(contactList);
+        editor.putBoolean("hasContacts", true);
+        editor.putString("contactList", json);
     }
 
 
@@ -300,6 +319,7 @@ public class MyForeGroundService extends Service {
         for (Long i : contactList.keySet()) {
             if (contactList.get(i).getDevice().getAddress().equals(deviceid)) {
                 hits++;
+
             }
         }
         return hits;
