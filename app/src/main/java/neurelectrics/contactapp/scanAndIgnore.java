@@ -9,6 +9,9 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ConcurrentModificationException;
 
 /**
@@ -16,6 +19,19 @@ import java.util.ConcurrentModificationException;
  */
 public class scanAndIgnore extends IntentService {
 
+    String fingerprint(ScanResult result) {
+        String temp = result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy();
+        try {
+            MessageDigest m = MessageDigest.getInstance("MD5");
+            m.update(temp.getBytes());
+            byte[] digest = m.digest();
+            BigInteger bigInt = new BigInteger(1, digest);
+            String hashtext = bigInt.toString(16);
+            return hashtext;
+        } catch (NoSuchAlgorithmException e) { //if for some reason we can't do md5, just return the original
+            return temp;
+        }
+    }
 
     public scanAndIgnore() {
         super("scanAndIgnore");
@@ -36,8 +52,8 @@ public class scanAndIgnore extends IntentService {
                 for (String i : scanData.getInstance().getData().keySet()) { //go through all the devices that have been found in the scan
 
                     ScanResult temp = scanData.getInstance().getData().get(i);
-                    if (ignoreDevices.indexOf(temp.getDevice().getAddress() + " ") == -1) { //device is not already in the ignore list
-                        ignoreDevices = ignoreDevices + temp.getDevice().getAddress() + " ";
+                    if (ignoreDevices.indexOf(fingerprint(temp) + " ") == -1) { //device is not already in the ignore list
+                        ignoreDevices = ignoreDevices + fingerprint(temp) + " ";
                     }
 
 
