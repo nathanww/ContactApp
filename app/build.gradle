@@ -6,8 +6,8 @@ android {
         applicationId "neurelectrics.contactapp"
         minSdkVersion 27
         targetSdkVersion 28
-        versionCode 19
-        versionName "1.9"
+        versionCode 20
+        versionName "2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
