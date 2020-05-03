@@ -13,8 +13,6 @@ public class autostart extends BroadcastReceiver {
         Log.i("trackingService", "attempting to start on boot");
         Intent startserv = new Intent(context, MyForeGroundService.class);
         startserv.setAction(MyForeGroundService.ACTION_START_FOREGROUND_SERVICE);
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(startserv);
         } else {

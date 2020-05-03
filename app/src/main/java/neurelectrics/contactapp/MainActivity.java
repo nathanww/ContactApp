@@ -143,105 +143,115 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
-        final SharedPreferences.Editor editor = prefs.edit();
 
-
-        //set up the exposure chart using quickchart.io to make the chart and Webview to display it
-        final WebView chartView = (WebView) findViewById(R.id.chartView);
-        chartView.setInitialScale(30);
-        chartView.setBackgroundColor(Color.WHITE);
-        chartView.getSettings().setLoadWithOverviewMode(true); //set scaling to automatically fit the image returned by server
-        chartView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
-        chartView.setScrollbarFadingEnabled(false);
-        chartView.getSettings().setUseWideViewPort(true);
-
-        //open the settings screen
-        final Button settingsButton = (Button) findViewById(R.id.settingsButton);
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity.this.startActivity(new Intent(MainActivity.this, settingsActivity.class));
-            }
-        });
-
-
-        //update the screen with list of detected devices
-        final TextView status = (TextView) findViewById(R.id.scanResults);
-        final TextView contactsToday = (TextView) findViewById(R.id.contactsList);
-        final Handler handler = new Handler();
-        final Runnable updateLoop = new Runnable() {
-            @Override
-            public void run() {
-                // first update the total number of contacts today
-                SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
-                String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
-                contactsToday.setText("Today's exposure score: " + prefs.getInt(todayKey, 0));
-                if (isVisible) {
-                    chartView.loadUrl(generateChartString(prefs.getInt("chartMode", 2))); //update the chart
-                }
-
-                //show the devices contirbuting--this is not visible by default because the textView that holds it is set to GONE but can be turned pn
-                String dispResult = "";
-                for (String i : scanData.getInstance().getData().keySet()) {
-                    ScanResult temp = scanData.getInstance().getData().get(i);
-                    if (temp.getRssi() > LIST_THRESH) {
-                        dispResult = dispResult + temp.getDevice().getAddress() + " : " + temp.getDevice().getName() + " " + temp.getRssi() + "\n";
-                    }
-                }
-                status.setText(dispResult);
-
-                handler.postDelayed(this, 30000);
-
-            }
-
-        };
-// start
-        handler.post(updateLoop);
-
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-//start the bluetooth search service, if we have the required location permission
+        // Bundle extras = getIntent().getExtras();
+        if (getIntent().getBooleanExtra("btReset", false)) { //do a silent start just to reinitialize Bluetooth stuff
             Intent intent = new Intent(MainActivity.this, MyForeGroundService.class);
             intent.setAction(MyForeGroundService.ACTION_START_FOREGROUND_SERVICE);
             startService(intent);
-        } else { //otherwise this is probably the first run, so open the intro window
-            MainActivity.this.startActivity(new Intent(MainActivity.this, PrivacySetup.class));
+            finish();
+        } else {
+
+            setContentView(R.layout.activity_main);
+            final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
+            final SharedPreferences.Editor editor = prefs.edit();
+
+
+            //set up the exposure chart using quickchart.io to make the chart and Webview to display it
+            final WebView chartView = (WebView) findViewById(R.id.chartView);
+            chartView.setInitialScale(30);
+            chartView.setBackgroundColor(Color.WHITE);
+            chartView.getSettings().setLoadWithOverviewMode(true); //set scaling to automatically fit the image returned by server
+            chartView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+            chartView.setScrollbarFadingEnabled(false);
+            chartView.getSettings().setUseWideViewPort(true);
+
+            //open the settings screen
+            final Button settingsButton = (Button) findViewById(R.id.settingsButton);
+            settingsButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    MainActivity.this.startActivity(new Intent(MainActivity.this, settingsActivity.class));
+                }
+            });
+
+
+            //update the screen with list of detected devices
+            final TextView status = (TextView) findViewById(R.id.scanResults);
+            final TextView contactsToday = (TextView) findViewById(R.id.contactsList);
+            final Handler handler = new Handler();
+            final Runnable updateLoop = new Runnable() {
+                @Override
+                public void run() {
+                    // first update the total number of contacts today
+                    SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
+                    String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
+                    contactsToday.setText("Today's exposure score: " + prefs.getInt(todayKey, 0));
+                    if (isVisible) {
+                        chartView.loadUrl(generateChartString(prefs.getInt("chartMode", 2))); //update the chart
+                    }
+
+                    //show the devices contirbuting--this is not visible by default because the textView that holds it is set to GONE but can be turned pn
+                    String dispResult = "";
+                    for (String i : scanData.getInstance().getData().keySet()) {
+                        ScanResult temp = scanData.getInstance().getData().get(i);
+                        if (temp.getRssi() > LIST_THRESH) {
+                            dispResult = dispResult + temp.getDevice().getAddress() + " : " + temp.getDevice().getName() + " " + temp.getRssi() + "\n";
+                        }
+                    }
+                    status.setText(dispResult);
+
+                    handler.postDelayed(this, 30000);
+
+                }
+
+            };
+// start
+            handler.post(updateLoop);
+
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//start the bluetooth search service, if we have the required location permission
+                Intent intent = new Intent(MainActivity.this, MyForeGroundService.class);
+                intent.setAction(MyForeGroundService.ACTION_START_FOREGROUND_SERVICE);
+                startService(intent);
+            } else { //otherwise this is probably the first run, so open the intro window
+                MainActivity.this.startActivity(new Intent(MainActivity.this, PrivacySetup.class));
+            }
+
+
+            //buttons for controlling the time view
+            final Button viewHour = (Button) findViewById(R.id.viewHour);
+            viewHour.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    editor.putInt("chartMode", 1);
+                    chartView.loadUrl(generateChartString(1));
+                    editor.apply();
+                }
+            });
+
+
+            final Button viewDay = (Button) findViewById(R.id.viewDay);
+            viewDay.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    editor.putInt("chartMode", 2);
+                    chartView.loadUrl(generateChartString(2));
+                    editor.apply();
+                }
+            });
+
+            final Button viewWeek = (Button) findViewById(R.id.viewWeek);
+            viewWeek.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    editor.putInt("chartMode", 3);
+                    chartView.loadUrl(generateChartString(3));
+                    editor.apply();
+                }
+            });
         }
-
-
-        //buttons for controlling the time view
-        final Button viewHour = (Button) findViewById(R.id.viewHour);
-        viewHour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editor.putInt("chartMode", 1);
-                chartView.loadUrl(generateChartString(1));
-                editor.apply();
-            }
-        });
-
-
-        final Button viewDay = (Button) findViewById(R.id.viewDay);
-        viewDay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editor.putInt("chartMode", 2);
-                chartView.loadUrl(generateChartString(2));
-                editor.apply();
-            }
-        });
-
-        final Button viewWeek = (Button) findViewById(R.id.viewWeek);
-        viewWeek.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editor.putInt("chartMode", 3);
-                chartView.loadUrl(generateChartString(3));
-                editor.apply();
-            }
-        });
     }
 
 

@@ -74,8 +74,10 @@ public class MyForeGroundService extends Service {
 
     long CONTACT_LIST_TIME = 1000 * 60 * (10); //number of ms contacts on the list should be kept for
     int CONTACT_LIST_MAX = 1; //start disregarding signals if they appear in more than this many scans
-    String signalsThisCycle = ""; //signals of any strength that have already been encountered in the current scan
 
+
+    String signalsThisCycle = ""; //signals of any strength that have already been encountered in the current scan
+    int totalSignals = 0; //total BT contacts detected
 
     String fingerprint(ScanResult result) {
         String temp = result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy();
@@ -115,7 +117,13 @@ public class MyForeGroundService extends Service {
         super.onDestroy();
         isRunning = false;
         this.unregisterReceiver(plugged);
-
+        Intent startserv = new Intent(getApplicationContext(), MyForeGroundService.class);
+        startserv.setAction(MyForeGroundService.ACTION_START_FOREGROUND_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            getApplicationContext().startForegroundService(startserv);
+        } else {
+            getApplicationContext().startService(startserv);
+        }
     }
 
     @Override
@@ -204,18 +212,42 @@ public class MyForeGroundService extends Service {
             stopForegroundService();
         }
 
-        mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
-        settings = new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
-        filters = new ArrayList<ScanFilter>();
+
         scanLeDevice(true);
 
         //tell the system not to go to sleep
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+        final PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK | PowerManager.LOCATION_MODE_NO_CHANGE,
                 "ContactApp::BluetoothScan");
         wakeLock.acquire();
 
+        //Some devices (i.e. Redmi note 8) seem to stop returning scan results after a while. We can check if this is happening, and, if so, silently restart the main activity to fix it.
+        final Handler btCheck = new Handler();
+        final Runnable btLoop = new Runnable() {
+            @Override
+            public void run() {
+
+                if (totalSignals == 0 && !powerManager.isInteractive()) { //nothing detected since last time this fired, reinitialize the app
+                    PowerManager.WakeLock restart = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                            "ContactApp::BluetoothRestart");
+                    restart.acquire();
+                    restart.release();
+                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    i.putExtra("btReset", true);
+                    getApplicationContext().startActivity(i);
+                    Log.e("scan", "Restarting app...");
+                }
+                totalSignals = 0;
+                btCheck.postDelayed(this, 30000);
+
+            }
+
+        };
+// start
+        btCheck.postDelayed(btLoop, 30000);
+
+        //If the Bluetooth system has not registered at least one signal in a minute, it's a sign that
         //compute the number of contacts every 30 seconds. This compensates for things like differences in bluetooth advertising rate.
         final Handler handler = new Handler();
         final Runnable updateLoop = new Runnable() {
@@ -252,6 +284,9 @@ public class MyForeGroundService extends Service {
 
 
                 cleanContactList(); //clean out old contacts from the contact list once they expire
+                //scanLeDevice(false);
+                //scanLeDevice(true);
+
 
                 handler.postDelayed(this, 30000);
 
@@ -259,14 +294,22 @@ public class MyForeGroundService extends Service {
 
         };
 // start
-        handler.post(updateLoop);
+        handler.postDelayed(updateLoop, 30000);
 
 
     }
 
     private void scanLeDevice(final boolean enable) {
         if (enable) { //start scanning process
-
+            //mBluetoothAdapter.disable();
+            mBluetoothAdapter.enable();
+            mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
+            settings = new ScanSettings.Builder()
+                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
+            filters = new ArrayList<ScanFilter>();
+            ScanFilter.Builder builder = new ScanFilter.Builder(); //reate a scan filter that matches anything to allow scans to run with screen off
+            ScanFilter filter = builder.build();
+            filters.add(filter);
             mLEScanner.startScan(filters, settings, mScanCallback);
             Log.e("scan", "Starting scan...");
         } else {
@@ -281,12 +324,12 @@ public class MyForeGroundService extends Service {
         public void onScanResult(int callbackType, ScanResult result) {
             scanResults.put(fingerprint(result), result);
             scanData.getInstance().setData(scanResults);
-            //Log.e("contact", result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower()+":"+result.getPeriodicAdvertisingInterval()+":"+result.getPrimaryPhy()+":"+result.getSecondaryPhy());
-
+            Log.e("contact", result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy());
+            totalSignals++;
             //check to see if this is a contact
             if (result.getRssi() >= CONTACT_THRESH) {
 
-
+                result.getDevice().fetchUuidsWithSdp(); //update the list of services offered by this device
                 //check if it is ignored
                 if (getSharedPreferences("com", MODE_PRIVATE).getString("ignoreDevices", "").indexOf(fingerprint(result)) == -1) {
                     //check the ignore list, and also the number of times this contact has been observed in the contact list. If it's not in the ignore list and hasn't been observed too much, add it to the contact list
