@@ -330,8 +330,6 @@ public class MyForeGroundService extends Service {
             if (result.getRssi() >= CONTACT_THRESH) {
 
                 result.getDevice().fetchUuidsWithSdp(); //update the list of services offered by this device
-                //check if it is ignored
-                if (getSharedPreferences("com", MODE_PRIVATE).getString("ignoreDevices", "").indexOf(fingerprint(result)) == -1) {
                     //check the ignore list, and also the number of times this contact has been observed in the contact list. If it's not in the ignore list and hasn't been observed too much, add it to the contact list
                     if (contactsThisCycle.indexOf(fingerprint(result)) == -1 && countContacts(fingerprint(result)) < CONTACT_LIST_MAX) {
                         contactsThisCycle = contactsThisCycle + fingerprint(result) + " ";
@@ -342,7 +340,6 @@ public class MyForeGroundService extends Service {
                         contactList.put(new Long(System.currentTimeMillis()), result);
                     }
 
-                }
 
             }
         }
