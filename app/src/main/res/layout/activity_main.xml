@@ -66,10 +66,17 @@
     </WebView>
 
     <Button
+        android:id="@+id/stopButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stop scanning" />
+
+    <Button
         android:id="@+id/settingsButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Settings"
         tools:layout_editor_absoluteX="16dp"
         tools:layout_editor_absoluteY="349dp" />
+
 </LinearLayout>

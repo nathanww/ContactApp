@@ -166,6 +166,16 @@ public class MainActivity extends AppCompatActivity {
             chartView.setScrollbarFadingEnabled(false);
             chartView.getSettings().setUseWideViewPort(true);
 
+
+            //button to quit the aplication
+            final Button stopButton = (Button) findViewById(R.id.stopButton);
+            stopButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finishActivity(1);
+                    System.exit(0);
+                }
+            });
             //open the settings screen
             final Button settingsButton = (Button) findViewById(R.id.settingsButton);
             settingsButton.setOnClickListener(new View.OnClickListener() {
