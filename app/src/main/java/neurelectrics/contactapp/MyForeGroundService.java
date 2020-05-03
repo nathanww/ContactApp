@@ -261,6 +261,7 @@ public class MyForeGroundService extends Service {
                     i.putExtra("btReset", true);
                     getApplicationContext().startActivity(i);
                     Log.e("scan", "Restarting app...");
+                    stopForegroundService();
                 }
                 totalSignals = 0;
                 btCheck.postDelayed(this, 30000);
