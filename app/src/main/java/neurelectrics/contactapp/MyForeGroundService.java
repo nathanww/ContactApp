@@ -32,6 +32,12 @@ import android.widget.Toast;
 import android.support.v4.app.NotificationCompat;
 
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 
 import java.math.BigInteger;
@@ -71,13 +77,31 @@ public class MyForeGroundService extends Service {
     //This makes the score more interpretable because long lasting contacts are often things that just happen to be in the vicinity and don't represent "real" contacts
     //contact_list time is how long the system keeps track of contacts, and contact list max in the number of 30-second periods in which they must be
     //observed before they stop counting.
-
-    long CONTACT_LIST_TIME = 1000 * 60 * (10); //number of ms contacts on the list should be kept for
+    long CONTACT_LIST_TIME = 1000 * 60 * (60); //number of ms contacts on the list should be kept for
     int CONTACT_LIST_MAX = 1; //start disregarding signals if they appear in more than this many scans
 
 
     String signalsThisCycle = ""; //signals of any strength that have already been encountered in the current scan
     int totalSignals = 0; //total BT contacts detected
+
+
+    void makeNetRequest(String URL, String data) {
+        RequestQueue netQ = Volley.newRequestQueue(getApplicationContext());
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //Nothing in here, because we don't (yet) care about what the outcome of sending the data was
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        });
+
+// Add the request to the RequestQueue.
+        netQ.add(stringRequest);
+    }
 
     String fingerprint(ScanResult result) {
         String temp = result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy();
@@ -227,7 +251,7 @@ public class MyForeGroundService extends Service {
             @Override
             public void run() {
 
-                if (totalSignals == 0 && !powerManager.isInteractive()) { //nothing detected since last time this fired, reinitialize the app
+                if (totalSignals == 0) { //nothing detected since last time this fired, reinitialize the app
                     PowerManager.WakeLock restart = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
                             "ContactApp::BluetoothRestart");
                     restart.acquire();
@@ -284,8 +308,8 @@ public class MyForeGroundService extends Service {
 
 
                 cleanContactList(); //clean out old contacts from the contact list once they expire
-                //scanLeDevice(false);
-                //scanLeDevice(true);
+                scanLeDevice(false);
+                scanLeDevice(true);
 
 
                 handler.postDelayed(this, 30000);
@@ -324,7 +348,7 @@ public class MyForeGroundService extends Service {
         public void onScanResult(int callbackType, ScanResult result) {
             scanResults.put(fingerprint(result), result);
             scanData.getInstance().setData(scanResults);
-            Log.e("contact", result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy());
+            //Log.e("contact", result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy());
             totalSignals++;
             //check to see if this is a contact
             if (result.getRssi() >= CONTACT_THRESH) {
