@@ -39,7 +39,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -215,7 +217,10 @@ public class MyForeGroundService extends Service {
         if (prefs.getBoolean("hasContacts", false)) {
             Gson gson = new Gson();
             String json = prefs.getString("contactList", "");
-            contactList = gson.fromJson(json, HashMap.class);
+            Type collectionType = new TypeToken<HashMap<Long, ScanResult>>() {
+            }.getType();
+            contactList = gson.fromJson(json, collectionType);
+
         }
         //start Bluetooth
         final BluetoothManager bluetoothManager =
@@ -261,7 +266,7 @@ public class MyForeGroundService extends Service {
                     i.putExtra("btReset", true);
                     getApplicationContext().startActivity(i);
                     Log.e("scan", "Restarting app...");
-                    stopForegroundService();
+                    System.exit(0);
                 }
                 totalSignals = 0;
                 btCheck.postDelayed(this, 30000);
@@ -397,6 +402,7 @@ public class MyForeGroundService extends Service {
             String json = gson.toJson(contactList);
             editor.putBoolean("hasContacts", true);
             editor.putString("contactList", json);
+            editor.apply();
         } catch (ConcurrentModificationException e) { //if these lists are already being modified, back off--we'll clean the contact list 30s later.
 
         }
@@ -406,8 +412,12 @@ public class MyForeGroundService extends Service {
     private int countContacts(String deviceid) { //count the number of contacts from this device
         int hits = 0;
         for (Long i : contactList.keySet()) {
-            if (fingerprint(contactList.get(i)).equals(deviceid)) {
-                hits++;
+            try {
+                if (fingerprint(contactList.get(i)).equals(deviceid)) {
+                    hits++;
+
+                }
+            } catch (NullPointerException e) { //sometimes we will encounter a 'null' device, in that case just skip it
 
             }
         }
