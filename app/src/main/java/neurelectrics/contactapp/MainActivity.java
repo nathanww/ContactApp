@@ -23,8 +23,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -148,7 +151,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.e("mainactivity", "oncreate");
         // Bundle extras = getIntent().getExtras();
-
+        //request to turn off battery optimization
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Intent intent = new Intent();
+            String packageName = getPackageName();
+            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                intent.setData(Uri.parse("package:" + packageName));
+                startActivity(intent);
+            }
+        }
 
         //This condition is used to handle an automatic restart to fix background issues--currently NEVER USED
         if (false && getIntent().getBooleanExtra("btReset", false)) {
@@ -300,12 +313,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         isVisible = false; //the app is no longer visible
+
     }
+
 
     @Override
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
-        finish();
+        finishAffinity();
     }
 
 }
