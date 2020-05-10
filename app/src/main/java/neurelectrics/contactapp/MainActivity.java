@@ -313,14 +313,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         isVisible = false; //the app is no longer visible
-
+        finishAffinity();
     }
 
 
     @Override
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
-        finishAffinity();
+
     }
 
 }
