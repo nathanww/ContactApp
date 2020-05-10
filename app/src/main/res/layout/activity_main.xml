@@ -8,6 +8,29 @@
     tools:context=".MainActivity">
 
 
+    <LinearLayout
+        android:id="@+id/backgroundWarning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/backgroundWarningText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⚠️ Background scanning issues"
+            android:textAlignment="textStart"
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/warningText2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your phone appears to be restricting background scans. This can cause the data to be inaccurate.\n\nVisit dontkillmyapp.com to find a guide on fixing background issues for your phone model." />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/contactsList"
         android:layout_width="match_parent"

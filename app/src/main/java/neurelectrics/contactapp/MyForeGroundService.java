@@ -1,11 +1,13 @@
 package neurelectrics.contactapp;
 
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
@@ -25,7 +27,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,6 +58,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
+
+import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 
 
 public class MyForeGroundService extends Service {
@@ -85,8 +91,8 @@ public class MyForeGroundService extends Service {
 
     String signalsThisCycle = ""; //signals of any strength that have already been encountered in the current scan
     int totalSignals = 0; //total BT contacts detected
-
-
+    int BACKGROUND_ISSUE_THRESHOLD = 10; //If we see no contacts for this many consecutive periods, assume that there is something wrong with our backround scan
+    int noContactCount = 0; //current # of times we have had zero contacts in a scan
     void makeNetRequest(String URL, String data) {
         RequestQueue netQ = Volley.newRequestQueue(getApplicationContext());
         StringRequest stringRequest = new StringRequest(Request.Method.POST, URL,
@@ -143,13 +149,7 @@ public class MyForeGroundService extends Service {
         super.onDestroy();
         isRunning = false;
         this.unregisterReceiver(plugged);
-        Intent startserv = new Intent(getApplicationContext(), MyForeGroundService.class);
-        startserv.setAction(MyForeGroundService.ACTION_START_FOREGROUND_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            getApplicationContext().startForegroundService(startserv);
-        } else {
-            getApplicationContext().startService(startserv);
-        }
+
     }
 
     @Override
@@ -246,7 +246,7 @@ public class MyForeGroundService extends Service {
 
         //tell the system not to go to sleep
         final PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK | PowerManager.LOCATION_MODE_NO_CHANGE,
+        final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK | PowerManager.LOCATION_MODE_NO_CHANGE,
                 "ContactApp::BluetoothScan");
         wakeLock.acquire();
 
@@ -256,20 +256,8 @@ public class MyForeGroundService extends Service {
             @Override
             public void run() {
 
-                if (totalSignals == 0) { //nothing detected since last time this fired, reinitialize the app
-                    PowerManager.WakeLock restart = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
-                            "ContactApp::BluetoothRestart");
-                    restart.acquire();
-                    restart.release();
-                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    i.putExtra("btReset", true);
-                    getApplicationContext().startActivity(i);
-                    Log.e("scan", "Restarting app...");
-                    System.exit(0);
-                }
-                totalSignals = 0;
-                btCheck.postDelayed(this, 30000);
+
+                btCheck.postDelayed(this, 15000);
 
             }
 
@@ -314,9 +302,49 @@ public class MyForeGroundService extends Service {
 
 
                 cleanContactList(); //clean out old contacts from the contact list once they expire
-                scanLeDevice(false);
-                scanLeDevice(true);
+                //scanLeDevice(false);
+                // scanLeDevice(true);
 
+
+                //checks for if the Bluetooth scan has failed
+
+                if ((totalSignals == 0)) {
+                    //nothing detected since last time this fired, if this happens a lot it means we probably encountered a background process limitation
+                    noContactCount++;
+                    if (noContactCount > BACKGROUND_ISSUE_THRESHOLD) {
+                        if (!prefs.getBoolean("backgroundIssue", false)) {
+                            editor.putBoolean("backgroundIssue", true);
+                            editor.commit();
+                        }
+                    }
+
+                    //BACKUP MODE--CURRENTLY DISABLED
+                    // We can do some things to try and restart the background scan, but it causes issues (screen turning on at random times). So currently we'll just ask the user to fix their power settings
+
+                    /*
+                    // The way to fix this is to reinitilaize the main activity (and then the service which is started by main)
+                    //Currently, this only runs with the system in sleep mode--this is because restarting the activity while the user is using the phone can give some weird animations
+
+                    //First, we need to wake the sytem up to start our new scan
+                    PowerManager.WakeLock restart = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,"ContactApp::BluetoothRestart");
+                    restart.acquire();
+                    restart.release();
+
+                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|FLAG_ACTIVITY_NO_ANIMATION);
+                    i.putExtra("btReset", true);
+                    getApplicationContext().startActivity(i);
+                    Log.e("scan", "Restarting app...");
+
+                    stopForegroundService();*/
+
+
+                } else {
+                    noContactCount = 0; //we had contacts, so reset this
+                }
+
+
+                totalSignals = 0;
 
                 handler.postDelayed(this, 30000);
 
@@ -354,7 +382,7 @@ public class MyForeGroundService extends Service {
         public void onScanResult(int callbackType, ScanResult result) {
             scanResults.put(fingerprint(result), result);
             scanData.getInstance().setData(scanResults);
-            //Log.e("contact", result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy());
+            Log.e("contact", result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy());
             totalSignals++;
             //check to see if this is a contact
             if (result.getRssi() >= CONTACT_THRESH) {
@@ -402,7 +430,7 @@ public class MyForeGroundService extends Service {
             String json = gson.toJson(contactList);
             editor.putBoolean("hasContacts", true);
             editor.putString("contactList", json);
-            editor.apply();
+            editor.commit();
         } catch (ConcurrentModificationException e) { //if these lists are already being modified, back off--we'll clean the contact list 30s later.
 
         }
@@ -428,7 +456,7 @@ public class MyForeGroundService extends Service {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManager.IMPORTANCE_LOW;
+            int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel("contactapp", "ContactApp notification", importance);
             channel.setDescription("Contactapp persistent notification");
             NotificationManager notificationManager = getSystemService(NotificationManager.class);

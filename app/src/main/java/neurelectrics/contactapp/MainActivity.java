@@ -32,9 +32,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -46,6 +48,7 @@ import org.w3c.dom.Text;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -143,20 +146,42 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Log.e("mainactivity", "oncreate");
         // Bundle extras = getIntent().getExtras();
-        if (getIntent().getBooleanExtra("btReset", false)) { //do a silent start just to reinitialize Bluetooth stuff
+
+
+        //This condition is used to handle an automatic restart to fix background issues--currently NEVER USED
+        if (false && getIntent().getBooleanExtra("btReset", false)) {
+            this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |
+                            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN |
+                            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+            //The activity is being restarted to fix Bluetooth issues, this should happen silently (i.e. not do anything in the UI)
+            overridePendingTransition(0, 0);
             Intent intent = new Intent(MainActivity.this, MyForeGroundService.class);
             intent.setAction(MyForeGroundService.ACTION_START_FOREGROUND_SERVICE);
             startService(intent);
             finish();
         } else {
-
+            //This is the part that always runs
             setContentView(R.layout.activity_main);
             final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
             final SharedPreferences.Editor editor = prefs.edit();
+            //check to see if a background scan issue was detected, if it was display the warning
+            if (prefs.getBoolean("backgroundIssue", false)) {
+                final LinearLayout backgroundWarning = (LinearLayout) findViewById(R.id.backgroundWarning);
+                backgroundWarning.setVisibility(View.VISIBLE);
+                try {
+                    editor.putBoolean("backgroundIssue", false);
+                    editor.commit();
+                } catch (ConcurrentModificationException e) {
 
-
+                }
+            }
             //set up the exposure chart using quickchart.io to make the chart and Webview to display it
             final WebView chartView = (WebView) findViewById(R.id.chartView);
             chartView.setInitialScale(30);
@@ -272,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() { //start the scan when the application starts
+    protected void onPause() {
         super.onPause();
         isVisible = false; //the app is no longer visible
     }
