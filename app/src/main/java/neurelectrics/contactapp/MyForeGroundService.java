@@ -91,7 +91,7 @@ public class MyForeGroundService extends Service {
 
     String signalsThisCycle = ""; //signals of any strength that have already been encountered in the current scan
     int totalSignals = 0; //total BT contacts detected
-    int BACKGROUND_ISSUE_THRESHOLD = 10; //If we see no contacts for this many consecutive periods, assume that there is something wrong with our backround scan
+    int BACKGROUND_ISSUE_THRESHOLD = 25; //If we see no contacts for this many consecutive periods, assume that there is something wrong with our backround scan
     int noContactCount = 0; //current # of times we have had zero contacts in a scan
     void makeNetRequest(String URL, String data) {
         RequestQueue netQ = Volley.newRequestQueue(getApplicationContext());
