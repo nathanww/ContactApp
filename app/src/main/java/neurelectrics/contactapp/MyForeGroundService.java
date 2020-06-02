@@ -93,6 +93,7 @@ public class MyForeGroundService extends Service {
     int totalSignals = 0; //total BT contacts detected
     int BACKGROUND_ISSUE_THRESHOLD = 60; //If we see no contacts for this many consecutive periods, assume that there is something wrong with our backround scan
     int noContactCount = 0; //current # of times we have had zero contacts in a scan
+    long nextWindow = 0;
     void makeNetRequest(String URL, String data) {
         RequestQueue netQ = Volley.newRequestQueue(getApplicationContext());
         StringRequest stringRequest = new StringRequest(Request.Method.POST, URL,
@@ -271,6 +272,7 @@ public class MyForeGroundService extends Service {
         final Runnable updateLoop = new Runnable() {
             @Override
             public void run() {
+                long startTime = System.currentTimeMillis();
                 int contactCount = contactsThisCycle.length() - contactsThisCycle.replace(" ", "").length(); //count the number of space-seperated addresses in the contact list
                 contactsThisCycle = ""; //reset the counter
                 signalsThisCycle = ""; //same for all signals
@@ -347,7 +349,7 @@ public class MyForeGroundService extends Service {
                 totalSignals = 0;
 
                 handler.postDelayed(this, 30000);
-
+                // Log.e("totalComputationTime",""+(System.currentTimeMillis()-startTime));
             }
 
         };
@@ -369,7 +371,7 @@ public class MyForeGroundService extends Service {
             ScanFilter filter = builder.build();
             filters.add(filter);
             mLEScanner.startScan(filters, settings, mScanCallback);
-            Log.e("scan", "Starting scan...");
+            //Log.e("scan", "Starting scan...");
         } else {
 
             mLEScanner.stopScan(mScanCallback);
@@ -380,14 +382,15 @@ public class MyForeGroundService extends Service {
     private ScanCallback mScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            scanResults.put(fingerprint(result), result);
-            scanData.getInstance().setData(scanResults);
-            Log.e("contact", result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy());
-            totalSignals++;
-            //check to see if this is a contact
-            if (result.getRssi() >= CONTACT_THRESH) {
-
-                result.getDevice().fetchUuidsWithSdp(); //update the list of services offered by this device
+            if (System.currentTimeMillis() >= nextWindow) {
+                scanResults.put(fingerprint(result), result);
+                scanData.getInstance().setData(scanResults);
+                //Log.e("contact", result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy());
+                totalSignals++;
+                //check to see if this is a contact
+                if (result.getRssi() >= CONTACT_THRESH) {
+                    long startTime = System.currentTimeMillis();
+                    result.getDevice().fetchUuidsWithSdp(); //update the list of services offered by this device
                     //check the ignore list, and also the number of times this contact has been observed in the contact list. If it's not in the ignore list and hasn't been observed too much, add it to the contact list
                     if (contactsThisCycle.indexOf(fingerprint(result)) == -1 && countContacts(fingerprint(result)) < CONTACT_LIST_MAX) {
                         contactsThisCycle = contactsThisCycle + fingerprint(result) + " ";
@@ -397,8 +400,9 @@ public class MyForeGroundService extends Service {
                         signalsThisCycle = signalsThisCycle + fingerprint(result) + " ";
                         contactList.put(new Long(System.currentTimeMillis()), result);
                     }
+                    nextWindow = System.currentTimeMillis() + (System.currentTimeMillis() - startTime); //assume that processing this signal will take as long as processing the last one and don't process anything new until that timeout--avoid CPU leaks
 
-
+                }
             }
         }
 
@@ -416,6 +420,7 @@ public class MyForeGroundService extends Service {
     }
 
     private void cleanContactList() { //remove any entries in contact list that are too old as defined by the CONTACT_LIST_TIME variable
+        long time1 = System.currentTimeMillis();
         try {
             for (Long i : contactList.keySet()) {
                 if (i < System.currentTimeMillis() - CONTACT_LIST_TIME) {
@@ -428,11 +433,11 @@ public class MyForeGroundService extends Service {
             //now convert contactList to a josn
             Gson gson = new Gson();
             String json = gson.toJson(contactList);
+
             editor.putBoolean("hasContacts", true);
             editor.putString("contactList", json);
             editor.commit();
         } catch (ConcurrentModificationException e) { //if these lists are already being modified, back off--we'll clean the contact list 30s later.
-
         }
     }
 
