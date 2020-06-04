@@ -46,6 +46,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.github.javiersantos.appupdater.AppUpdater;
+import com.github.javiersantos.appupdater.enums.UpdateFrom;
+
 import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
@@ -182,6 +185,13 @@ public class MainActivity extends AppCompatActivity {
         } else {
             //This is the part that always runs
             setContentView(R.layout.activity_main);
+
+            //start update checker
+            AppUpdater update = new AppUpdater(this)
+                    .setUpdateFrom(UpdateFrom.JSON)
+                    .setUpdateJSON("https://raw.githubusercontent.com/nathanww/ContactApp/master/update.json");
+            update.start();
+
             final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
             final SharedPreferences.Editor editor = prefs.edit();
             //check to see if a background scan issue was detected, if it was display the warning
