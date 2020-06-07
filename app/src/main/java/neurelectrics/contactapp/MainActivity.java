@@ -166,17 +166,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.e("mainactivity", "oncreate");
         // Bundle extras = getIntent().getExtras();
-        //request to turn off battery optimization
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Intent intent = new Intent();
-            String packageName = getPackageName();
-            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                intent.setData(Uri.parse("package:" + packageName));
-                startActivity(intent);
-            }
-        }
+
 
         //This condition is used to handle an automatic restart to fix background issues--currently NEVER USED
         if (false && getIntent().getBooleanExtra("btReset", false)) {
@@ -197,6 +187,19 @@ public class MainActivity extends AppCompatActivity {
         } else {
             //This is the part that always runs
             setContentView(R.layout.activity_main);
+
+
+            //request to turn off battery optimization
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Intent intent = new Intent();
+                String packageName = getPackageName();
+                PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+                if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                    intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                    intent.setData(Uri.parse("package:" + packageName));
+                    startActivity(intent);
+                }
+            }
 
             //start update checker
             AppUpdater update = new AppUpdater(this)

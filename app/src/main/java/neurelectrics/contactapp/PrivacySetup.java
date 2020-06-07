@@ -57,7 +57,9 @@ public class PrivacySetup extends AppCompatActivity {
         completeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                PrivacySetup.this.startActivity(new Intent(PrivacySetup.this, MainActivity.class));
+
+
             }
         });
     }
