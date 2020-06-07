@@ -1,12 +1,8 @@
 # ContactApp
-ContactApp uses Bluetooth proximity measurements, in order to help people and health agencies implement social distancing more effectively. It helps individuals identify which activites pose the most risk and help *health departments* monitor the overall impact of social distancing policies.
-
+ContactApp uses Bluetooth proximity measurements, in order to track social distancing and help people and hep people identify which activites pose the most risk.
 
 ## Download
-Right now the best way to download ContactApp is through Google Play [here](https://play.google.com/store/apps/details?id=neurelectrics.contactapp).  
-
-Google play is very slow to update, so if yo want the latest version you can install the app-release.apk file from this repository. You will probably need to enable apps from [unknown sources](https://www.technipages.com/where-did-allow-installation-from-unknown-sources-go-in-android) to install it this way. 
-
+Right now the best way to download ContactApp is directly from GitHub [here](https://github.com/nathanww/ContactApp/blob/master/app-release.apk?raw=true) since Google Play is barring COVID-related apps. To install ContactApp, you will probably need to enable apps from [unknown sources](https://www.technipages.com/where-did-allow-installation-from-unknown-sources-go-in-android).
 
 ![Screenshot](screenshot2.png?raw=true)
 ## Inspiration
@@ -22,6 +18,3 @@ Notably, this approach is anonymous by design, and does not rely on sharing GPS 
 
 ## What's next for ContactApp
 I am working on a data logging mode to assist public health departments. In this mode, a low-cost Android device is placed in a public area (i.e. an office) and logs the number of devices it sees. This can be used to assess the effectiveness of policies--i.e. How much does a stay at home order reduce traffic to a location?
-
-A next step is to add voluntary contact tracing/notification features, where a user who has COVID can choose to upload their device ID to a central server. Other users who have had prolonged close contact with IDs marked as “infected” can then be notified to seek testing or self-isolate. 
-
