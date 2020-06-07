@@ -94,6 +94,9 @@ public class MyForeGroundService extends Service {
     int BACKGROUND_ISSUE_THRESHOLD = 60; //If we see no contacts for this many consecutive periods, assume that there is something wrong with our backround scan
     int noContactCount = 0; //current # of times we have had zero contacts in a scan
     long nextWindow = 0;
+
+    int totalPeriods = 0;
+
     void makeNetRequest(String URL, String data) {
         RequestQueue netQ = Volley.newRequestQueue(getApplicationContext());
         StringRequest stringRequest = new StringRequest(Request.Method.POST, URL,
@@ -284,14 +287,14 @@ public class MyForeGroundService extends Service {
 
 
                 //formats and keys for weekly and hourly graphs
-                SimpleDateFormat weekdayFormat = new SimpleDateFormat("u-W-MMM-yyyy");
-                String weekdayKey = "week-" + weekdayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
+
                 SimpleDateFormat minuteFormat = new SimpleDateFormat("m-H-dd-MMM-yyyy");
                 String minuteKey = "min-" + minuteFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
-                Log.i("weekformatset", weekdayKey);
+
 
                 final SharedPreferences.Editor editor = getSharedPreferences("com", MODE_PRIVATE).edit();
                 //get the total number of contacts today, add one, and write it back
+                Log.i("daySet", todayKey);
                 editor.putInt(todayKey, getSharedPreferences("com", MODE_PRIVATE).getInt(todayKey, 0) + contactCount);
                 //also update the contacts this hour
                 editor.putInt(hourKey, getSharedPreferences("com", MODE_PRIVATE).getInt(hourKey, 0) + contactCount);
@@ -299,13 +302,18 @@ public class MyForeGroundService extends Service {
 
                 //update contacts for this minute and contacts for this day
                 editor.putInt(minuteKey, getSharedPreferences("com", MODE_PRIVATE).getInt(minuteKey, 0) + contactCount);
-                editor.putInt(weekdayKey, getSharedPreferences("com", MODE_PRIVATE).getInt(weekdayKey, 0) + contactCount);
                 editor.apply();
 
 
                 cleanContactList(); //clean out old contacts from the contact list once they expire
-                //scanLeDevice(false);
-                // scanLeDevice(true);
+
+                //every 3 runs (1.5 minutes) restart the scan to avoid running into long running scan restrictions
+                if (totalPeriods >= 3) {
+                    scanLeDevice(false);
+                    scanLeDevice(true);
+                    totalPeriods = 0;
+                }
+                totalPeriods++;
 
 
                 //checks for if the Bluetooth scan has failed

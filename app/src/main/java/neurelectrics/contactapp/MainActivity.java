@@ -55,6 +55,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.ConcurrentModificationException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         //chart fomratting data
         String BASE_REQUEST_HOUR = "https://quickchart.io/chart?c={type:%27line%27,%20options:%20{legend:%20{display:%20false}},data:{labels:[%2712%20AM%27,%271%20AM%27,%272%20AM%27,%273%20AM%27,%274%20AM%27,%275%20AM%27,%276%20AM%27,%277%20AM%27,%278%20AM%27,%279%20AM%27,%2710%20AM%27,%2711%20AM%27,%2712%20PM%27,%20%271%20PM%27,%272%20PM%27,%273%20PM%27,%274%20PM%27,%275%20PM%27,%276%20PM%27,%277%20PM%27,%278%20PM%27,%279%20PM%27,%2710%20PM%27,%2711%20PM%27],%20datasets:[{label:%27%27,%20data:%20[#CHARTDATA#],%20fill:false,borderColor:%27blue%27}]}}";
         String BASE_REQUEST_MINUTE = "https://quickchart.io/chart?c={type:%27line%27,%20options:%20{legend:%20{display:%20false}},data:{labels:[#LABELDATA#],%20datasets:[{label:%27%27,%20data:%20[#CHARTDATA#],%20fill:false,borderColor:%27blue%27}]}}";
-        String BASE_REQUEST_DAILY = "https://quickchart.io/chart?c={type:'line', options: {legend: {display: false}},data:{labels:['Mon','Tues','Wed','Thurs','Fri','Sat','Sun'], datasets:[{label:'', data: [#CHARTDATA#], fill:false,borderColor:'blue'}]}}";
+        String BASE_REQUEST_DAILY = "https://quickchart.io/chart?c={type:'line', options: {legend: {display: false}},data:{labels:[#LABELDATA#], datasets:[{label:'', data: [#CHARTDATA#], fill:false,borderColor:'blue'}]}}";
 
         //Strings for obtained data
         String hourlyData = "";
@@ -85,8 +86,7 @@ public class MainActivity extends AppCompatActivity {
         //formats and keys
         SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
         String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
-        SimpleDateFormat weekdayFormat = new SimpleDateFormat("-W-MMM-yyyy");
-        String weekdayKey = weekdayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
+
         SimpleDateFormat minuteFormat = new SimpleDateFormat("-H-dd-MMM-yyyy");
         String minuteKey = minuteFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
         SimpleDateFormat hourFormat = new SimpleDateFormat("H");
@@ -116,9 +116,21 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+
+        //for this one we use a custom label since it is getting data for the last 7 days and we don't know up front which weekdays
+        //Therefore, we find the day of the week for each data point and plug it in
+        SimpleDateFormat weekdayFormat = new SimpleDateFormat("E");
+        String WEEK_LABELS = "";
         //and for the day of the week
-        for (int day = 1; day <= 7; day++) {
-            int contactNum = prefs.getInt("week-" + day + weekdayKey, -1);
+        for (int daysBehind = 6; daysBehind >= 0; daysBehind--) {
+            Calendar thisDate = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
+            thisDate.add(Calendar.DATE, 0 - daysBehind);
+            String thisDayKey = todayFormat.format(thisDate.getTime());
+            String thisDayLabel = weekdayFormat.format(thisDate.getTime());
+            WEEK_LABELS = WEEK_LABELS + "'" + thisDayLabel + "'" + ",";
+
+
+            int contactNum = prefs.getInt(thisDayKey, -1);
             if (contactNum > -1) { //we actually have data for this slot
                 dailyData = dailyData + contactNum + ",";
             } else {
@@ -138,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
             BASE_REQUEST_HOUR = BASE_REQUEST_HOUR.replace("#CHARTDATA#", hourlyData); //plug the data into the URL
             return BASE_REQUEST_HOUR;
         } else {
-            BASE_REQUEST_DAILY = BASE_REQUEST_DAILY.replace("#CHARTDATA#", dailyData); //plug the data into the URL
+            BASE_REQUEST_DAILY = BASE_REQUEST_DAILY.replace("#CHARTDATA#", dailyData).replace("#LABELDATA#", WEEK_LABELS); //plug the data into the URL
             return BASE_REQUEST_DAILY;
         }
     }
