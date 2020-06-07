@@ -420,25 +420,24 @@ public class MyForeGroundService extends Service {
     }
 
     private void cleanContactList() { //remove any entries in contact list that are too old as defined by the CONTACT_LIST_TIME variable
-        long time1 = System.currentTimeMillis();
-        try {
-            for (Long i : contactList.keySet()) {
-                if (i < System.currentTimeMillis() - CONTACT_LIST_TIME) {
-                    contactList.remove(i);
-                }
+
+        HashMap<Long, ScanResult> contactCopy = (HashMap) contactList.clone();
+        for (Long i : contactCopy.keySet()) {
+            if (i < System.currentTimeMillis() - CONTACT_LIST_TIME) {
+                contactList.remove(i);
             }
-            //write the contactList back to storage
-            final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE); //local sharedprefs
-            final SharedPreferences.Editor editor = prefs.edit();
-            //now convert contactList to a josn
-            Gson gson = new Gson();
-            String json = gson.toJson(contactList);
+        }
+        //write the contactList back to storage
+        final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE); //local sharedprefs
+        final SharedPreferences.Editor editor = prefs.edit();
+        //now convert contactList to a josn
+        Gson gson = new Gson();
+        String json = gson.toJson(contactList);
 
             editor.putBoolean("hasContacts", true);
             editor.putString("contactList", json);
             editor.commit();
-        } catch (ConcurrentModificationException e) { //if these lists are already being modified, back off--we'll clean the contact list 30s later.
-        }
+
     }
 
 

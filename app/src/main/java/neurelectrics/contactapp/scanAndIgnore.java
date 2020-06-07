@@ -61,7 +61,7 @@ public class scanAndIgnore extends IntentService {
                 editor.putString("ignoreDevices", ignoreDevices);
                 editor.commit();
             } catch (ConcurrentModificationException e) { //A CME will happen if this list got updated; in this case we just need to skip this run and try again on the next one.
-
+                Log.e("ignoreList", "CME");
             }
             SystemClock.sleep(1000); //wait one second
         }
