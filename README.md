@@ -1,5 +1,5 @@
 # ContactApp
-ContactApp uses Bluetooth proximity measurements, in order to track social distancing and help people and help people identify which activites pose the most risk.
+ContactApp uses Bluetooth proximity measurements, in order to track social distancing and help people identify which activities pose the most risk.
 
 ## Download
 Right now the best way to download ContactApp is directly from GitHub [here](https://github.com/nathanww/ContactApp/blob/master/app-release.apk?raw=true) since Google Play is barring COVID-related apps. To install ContactApp, you will probably need to enable apps from [unknown sources](https://www.technipages.com/where-did-allow-installation-from-unknown-sources-go-in-android).
