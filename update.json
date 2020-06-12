@@ -1,8 +1,8 @@
 {
-  "latestVersion": "2.6",
-  "latestVersionCode": 26,
+  "latestVersion": "2.8",
+  "latestVersionCode": 28,
   "url": "https://github.com/nathanww/ContactApp/raw/master/app-release.apk",
   "releaseNotes": [
-    "Testing auto updates"
+    "Fixes a bug where app would sometimes quit itself"
   ]
 }
