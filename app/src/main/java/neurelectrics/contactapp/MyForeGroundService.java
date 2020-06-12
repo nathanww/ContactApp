@@ -275,60 +275,61 @@ public class MyForeGroundService extends Service {
         final Runnable updateLoop = new Runnable() {
             @Override
             public void run() {
-                long startTime = System.currentTimeMillis();
-                int contactCount = contactsThisCycle.length() - contactsThisCycle.replace(" ", "").length(); //count the number of space-seperated addresses in the contact list
-                contactsThisCycle = ""; //reset the counter
-                signalsThisCycle = ""; //same for all signals
-                SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
-                SimpleDateFormat hourFormat = new SimpleDateFormat("H-dd-MMM-yyyy");
+                try {
+                    long startTime = System.currentTimeMillis();
+                    int contactCount = contactsThisCycle.length() - contactsThisCycle.replace(" ", "").length(); //count the number of space-seperated addresses in the contact list
+                    contactsThisCycle = ""; //reset the counter
+                    signalsThisCycle = ""; //same for all signals
+                    SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
+                    SimpleDateFormat hourFormat = new SimpleDateFormat("H-dd-MMM-yyyy");
 
-                String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
-                String hourKey = hourFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
-
-
-                //formats and keys for weekly and hourly graphs
-
-                SimpleDateFormat minuteFormat = new SimpleDateFormat("m-H-dd-MMM-yyyy");
-                String minuteKey = "min-" + minuteFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
+                    String todayKey = todayFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
+                    String hourKey = hourFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
 
 
-                final SharedPreferences.Editor editor = getSharedPreferences("com", MODE_PRIVATE).edit();
-                //get the total number of contacts today, add one, and write it back
-                editor.putInt(todayKey, getSharedPreferences("com", MODE_PRIVATE).getInt(todayKey, 0) + contactCount);
-                //also update the contacts this hour
-                editor.putInt(hourKey, getSharedPreferences("com", MODE_PRIVATE).getInt(hourKey, 0) + contactCount);
+                    //formats and keys for weekly and hourly graphs
+
+                    SimpleDateFormat minuteFormat = new SimpleDateFormat("m-H-dd-MMM-yyyy");
+                    String minuteKey = "min-" + minuteFormat.format(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getTime());
 
 
-                //update contacts for this minute and contacts for this day
-                editor.putInt(minuteKey, getSharedPreferences("com", MODE_PRIVATE).getInt(minuteKey, 0) + contactCount);
-                editor.apply();
+                    final SharedPreferences.Editor editor = getSharedPreferences("com", MODE_PRIVATE).edit();
+                    //get the total number of contacts today, add one, and write it back
+                    editor.putInt(todayKey, getSharedPreferences("com", MODE_PRIVATE).getInt(todayKey, 0) + contactCount);
+                    //also update the contacts this hour
+                    editor.putInt(hourKey, getSharedPreferences("com", MODE_PRIVATE).getInt(hourKey, 0) + contactCount);
 
 
-                cleanContactList(); //clean out old contacts from the contact list once they expire
-
-                //every 3 runs (1.5 minutes) restart the scan to avoid running into long running scan restrictions
-                if (totalPeriods >= 3) {
-                    scanLeDevice(false);
-                    scanLeDevice(true);
-                    totalPeriods = 0;
-                }
-                totalPeriods++;
+                    //update contacts for this minute and contacts for this day
+                    editor.putInt(minuteKey, getSharedPreferences("com", MODE_PRIVATE).getInt(minuteKey, 0) + contactCount);
+                    editor.apply();
 
 
-                //checks for if the Bluetooth scan has failed
+                    cleanContactList(); //clean out old contacts from the contact list once they expire
 
-                if ((totalSignals == 0)) {
-                    //nothing detected since last time this fired, if this happens a lot it means we probably encountered a background process limitation
-                    noContactCount++;
-                    if (noContactCount > BACKGROUND_ISSUE_THRESHOLD) {
-                        if (!prefs.getBoolean("backgroundIssue", false)) {
-                            editor.putBoolean("backgroundIssue", true);
-                            editor.commit();
-                        }
+                    //every 3 runs (1.5 minutes) restart the scan to avoid running into long running scan restrictions
+                    if (totalPeriods >= 3) {
+                        scanLeDevice(false);
+                        scanLeDevice(true);
+                        totalPeriods = 0;
                     }
+                    totalPeriods++;
 
-                    //BACKUP MODE--CURRENTLY DISABLED
-                    // We can do some things to try and restart the background scan, but it causes issues (screen turning on at random times). So currently we'll just ask the user to fix their power settings
+
+                    //checks for if the Bluetooth scan has failed
+
+                    if ((totalSignals == 0)) {
+                        //nothing detected since last time this fired, if this happens a lot it means we probably encountered a background process limitation
+                        noContactCount++;
+                        if (noContactCount > BACKGROUND_ISSUE_THRESHOLD) {
+                            if (!prefs.getBoolean("backgroundIssue", false)) {
+                                editor.putBoolean("backgroundIssue", true);
+                                editor.commit();
+                            }
+                        }
+
+                        //BACKUP MODE--CURRENTLY DISABLED
+                        // We can do some things to try and restart the background scan, but it causes issues (screen turning on at random times). So currently we'll just ask the user to fix their power settings
 
                     /*
                     // The way to fix this is to reinitilaize the main activity (and then the service which is started by main)
@@ -348,13 +349,15 @@ public class MyForeGroundService extends Service {
                     stopForegroundService();*/
 
 
-                } else {
-                    noContactCount = 0; //we had contacts, so reset this
+                    } else {
+                        noContactCount = 0; //we had contacts, so reset this
+                    }
+
+
+                    totalSignals = 0;
+                } catch (Exception e) {
+                    Log.e("loopError", e.getLocalizedMessage());
                 }
-
-
-                totalSignals = 0;
-
                 handler.postDelayed(this, 30000);
                 // Log.e("totalComputationTime",""+(System.currentTimeMillis()-startTime));
             }
@@ -389,27 +392,31 @@ public class MyForeGroundService extends Service {
     private ScanCallback mScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            if (System.currentTimeMillis() >= nextWindow) {
-                scanResults.put(fingerprint(result), result);
-                scanData.getInstance().setData(scanResults);
-                //Log.e("contact", result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy());
-                totalSignals++;
-                //check to see if this is a contact
-                if (result.getRssi() >= CONTACT_THRESH) {
-                    long startTime = System.currentTimeMillis();
-                    result.getDevice().fetchUuidsWithSdp(); //update the list of services offered by this device
-                    //check the ignore list, and also the number of times this contact has been observed in the contact list. If it's not in the ignore list and hasn't been observed too much, add it to the contact list
-                    if (contactsThisCycle.indexOf(fingerprint(result)) == -1 && countContacts(fingerprint(result)) < CONTACT_LIST_MAX) {
-                        contactsThisCycle = contactsThisCycle + fingerprint(result) + " ";
+            try {
+                if (System.currentTimeMillis() >= nextWindow) {
+                    scanResults.put(fingerprint(result), result);
+                    scanData.getInstance().setData(scanResults);
+                    //Log.e("contact", result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy());
+                    totalSignals++;
+                    //check to see if this is a contact
+                    if (result.getRssi() >= CONTACT_THRESH) {
+                        long startTime = System.currentTimeMillis();
+                        result.getDevice().fetchUuidsWithSdp(); //update the list of services offered by this device
+                        //check the ignore list, and also the number of times this contact has been observed in the contact list. If it's not in the ignore list and hasn't been observed too much, add it to the contact list
+                        if (contactsThisCycle.indexOf(fingerprint(result)) == -1 && countContacts(fingerprint(result)) < CONTACT_LIST_MAX) {
+                            contactsThisCycle = contactsThisCycle + fingerprint(result) + " ";
+
+                        }
+                        if (signalsThisCycle.indexOf(fingerprint(result)) == -1) { //if this device has not been seen this cycle, add it to the list regardless of signal strength
+                            signalsThisCycle = signalsThisCycle + fingerprint(result) + " ";
+                            contactList.put(new Long(System.currentTimeMillis()), result);
+                        }
+                        nextWindow = System.currentTimeMillis() + (System.currentTimeMillis() - startTime); //assume that processing this signal will take as long as processing the last one and don't process anything new until that timeout--avoid CPU leaks
 
                     }
-                    if (signalsThisCycle.indexOf(fingerprint(result)) == -1) { //if this device has not been seen this cycle, add it to the list regardless of signal strength
-                        signalsThisCycle = signalsThisCycle + fingerprint(result) + " ";
-                        contactList.put(new Long(System.currentTimeMillis()), result);
-                    }
-                    nextWindow = System.currentTimeMillis() + (System.currentTimeMillis() - startTime); //assume that processing this signal will take as long as processing the last one and don't process anything new until that timeout--avoid CPU leaks
-
                 }
+            } catch (Exception e) {
+                Log.e("scanerror", e.getLocalizedMessage());
             }
         }
 

@@ -39,33 +39,36 @@ public class scanAndIgnore extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        int timeToRun = intent.getIntExtra("timeToRun", -1);
-        if (timeToRun == -1) {
-            timeToRun = 20;
-        }
-        //sharedPref
-        final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
-        final SharedPreferences.Editor editor = prefs.edit();
-        String ignoreDevices = prefs.getString("ignoreDevices", "");
-        for (int run = 0; run < (60 * timeToRun); run++) { //this makes it keep scanning for 20 minutes in order to capture devices that don't broadcast that frequently
-            try {
-                for (String i : scanData.getInstance().getData().keySet()) { //go through all the devices that have been found in the scan
-
-                    ScanResult temp = scanData.getInstance().getData().get(i);
-                    if (ignoreDevices.indexOf(fingerprint(temp) + " ") == -1) { //device is not already in the ignore list
-                        ignoreDevices = ignoreDevices + fingerprint(temp) + " ";
-                    }
-
-
-                }
-                editor.putString("ignoreDevices", ignoreDevices);
-                editor.commit();
-            } catch (ConcurrentModificationException e) { //A CME will happen if this list got updated; in this case we just need to skip this run and try again on the next one.
-                Log.e("ignoreList", "CME");
+        try {
+            int timeToRun = intent.getIntExtra("timeToRun", -1);
+            if (timeToRun == -1) {
+                timeToRun = 20;
             }
-            SystemClock.sleep(1000); //wait one second
-        }
+            //sharedPref
+            final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
+            final SharedPreferences.Editor editor = prefs.edit();
+            String ignoreDevices = prefs.getString("ignoreDevices", "");
+            for (int run = 0; run < (60 * timeToRun); run++) { //this makes it keep scanning for 20 minutes in order to capture devices that don't broadcast that frequently
+                try {
+                    for (String i : scanData.getInstance().getData().keySet()) { //go through all the devices that have been found in the scan
 
+                        ScanResult temp = scanData.getInstance().getData().get(i);
+                        if (ignoreDevices.indexOf(fingerprint(temp) + " ") == -1) { //device is not already in the ignore list
+                            ignoreDevices = ignoreDevices + fingerprint(temp) + " ";
+                        }
+
+
+                    }
+                    editor.putString("ignoreDevices", ignoreDevices);
+                    editor.commit();
+                } catch (ConcurrentModificationException e) { //A CME will happen if this list got updated; in this case we just need to skip this run and try again on the next one.
+                    Log.e("ignoreList", "CME");
+                }
+                SystemClock.sleep(1000); //wait one second
+            }
+        } catch (Exception e) {
+            Log.e("ScanIgnoreError", e.getLocalizedMessage());
+        }
     }
 
 
