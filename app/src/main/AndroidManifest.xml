@@ -2,18 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="neurelectrics.contactapp">
 
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-feature
-        android:name="android.hardware.bluetooth_le"
-        android:required="true" />
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,6 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".privacyOptIn"></activity>
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait">
@@ -31,15 +20,12 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".MyForeGroundService"
-            android:enabled="true"
-            android:exported="false" />
-
         <activity
             android:name=".settingsActivity"
             android:label="@string/title_activity_settings"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity android:name=".PrivacySetup" />
 
         <receiver
             android:name=".autostart"
@@ -50,16 +36,33 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".PrivacySetup" />
+        <receiver
+            android:name=".pluggedIn"
+            android:enabled="true"
+            android:exported="true" />
 
         <service
             android:name=".scanAndIgnore"
             android:exported="false" />
 
-        <receiver
-            android:name=".pluggedIn"
+        <service
+            android:name=".MyForeGroundService"
             android:enabled="true"
-            android:exported="true"></receiver>
+            android:exported="false" />
     </application>
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
 </manifest>

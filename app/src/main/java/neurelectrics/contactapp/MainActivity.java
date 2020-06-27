@@ -155,11 +155,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    boolean isWearable(BluetoothDevice bd) {
-        int btClass = bd.getBluetoothClass().getDeviceClass();
-        int majorClass = bd.getBluetoothClass().getMajorDeviceClass();
-        return (true || majorClass == BluetoothClass.Device.Major.UNCATEGORIZED || majorClass == BluetoothClass.Device.Major.PHONE || majorClass == BluetoothClass.Device.Major.WEARABLE || majorClass == BluetoothClass.Device.Major.HEALTH || btClass == BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES || btClass == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET || btClass == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -201,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
+
             //start update checker
             AppUpdater update = new AppUpdater(this)
                     .setUpdateFrom(UpdateFrom.JSON)
@@ -209,6 +205,12 @@ public class MainActivity extends AppCompatActivity {
 
             final SharedPreferences prefs = getSharedPreferences("com", MODE_PRIVATE);
             final SharedPreferences.Editor editor = prefs.edit();
+
+            //have we configured data sharing yet?
+            if (prefs.getInt("dataSharing", -1) == -1) {
+                MainActivity.this.startActivity(new Intent(MainActivity.this, privacyOptIn.class));
+            }
+
             //check to see if a background scan issue was detected, if it was display the warning
             if (prefs.getBoolean("backgroundIssue", false)) {
                 final LinearLayout backgroundWarning = (LinearLayout) findViewById(R.id.backgroundWarning);

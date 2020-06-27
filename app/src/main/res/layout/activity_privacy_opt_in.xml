@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".privacyOptIn">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Exposure sharing"
+            android:textAlignment="center"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/dataShareDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Anonymously sharing your exposure may help build better disease models. \n\nIf you choose to share exposure information, the app will share the number of Bluetooth devices detected with researchers. The app will also share your internet address, which identifies your current city, but does not share more specific location data. The app does NOT perform contact tracing or tell you if you have encountered infected people.\n\n" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Anonymously share your exposure with researchers?"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/yesbutton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Yes" />
+
+        <Button
+            android:id="@+id/nobutton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No thanks" />
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>

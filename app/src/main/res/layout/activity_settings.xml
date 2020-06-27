@@ -43,6 +43,40 @@
         android:layout_height="1dp"
         android:background="?android:attr/listDivider" />
 
+    <TextView
+        android:id="@+id/shareHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Exposure sharing settings"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/dataSharingExp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Exposure sharing is currently ON. If you wish to send data to your own server instead of the default one, you can specify the server below." />
+
+    <TextView
+        android:id="@+id/dataSharingOff"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Exposure sharing is currently OFF"
+        android:visibility="gone" />
+
+    <EditText
+        android:id="@+id/sharingServer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textUri"
+        android:text="https://biostream-1024.appspot.com/sd?" />
+
+    <Button
+        android:id="@+id/sharingSettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Turn sharing on or off" />
+
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -56,4 +90,5 @@
             tools:layout_editor_absoluteY="294dp" />
 
     </android.support.constraint.ConstraintLayout>
+
 </LinearLayout>

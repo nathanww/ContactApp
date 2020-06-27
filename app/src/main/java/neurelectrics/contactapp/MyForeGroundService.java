@@ -97,7 +97,12 @@ public class MyForeGroundService extends Service {
 
     int totalPeriods = 0;
 
-    void makeNetRequest(String URL, String data) {
+    //if we have more than SEND_AT scans and data sharing is turned on, upload the data to the server
+    int sendScanCount = 0;
+    int SEND_AT = 30;
+    int hourly_total = 0;
+
+    void makeNetRequest(String URL) {
         RequestQueue netQ = Volley.newRequestQueue(getApplicationContext());
         StringRequest stringRequest = new StringRequest(Request.Method.POST, URL,
                 new Response.Listener<String>() {
@@ -108,11 +113,13 @@ public class MyForeGroundService extends Service {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                Log.e("netError", error.toString());
             }
         });
 
 // Add the request to the RequestQueue.
         netQ.add(stringRequest);
+        Log.i("netRequest", "sent " + URL);
     }
 
     String fingerprint(ScanResult result) {
@@ -213,9 +220,15 @@ public class MyForeGroundService extends Service {
         Notification notification = builder.build();
         // Start foreground service.
         startForeground(1, notification);
+
+        //check to see if we have a device ID and generate one if not
+        if (prefs.getInt("deviceID", -1) == -1) {
+            int randomID = (int) (Math.random() * 100000);
+            editor.putInt("deviceID", randomID);
+            editor.commit();
+        }
         //ContactList stores contacts over the last 24 hours for "adaptation" (i.e. so persistent contacts like refrigerators don't keep
         //inflating the score
-
         //if a contactList already exists load it from storage, otherwise we can use the blank one
 
         if (prefs.getBoolean("hasContacts", false)) {
@@ -314,6 +327,13 @@ public class MyForeGroundService extends Service {
                         totalPeriods = 0;
                     }
                     totalPeriods++;
+                    sendScanCount++;
+                    hourly_total = hourly_total + contactCount;
+                    if (sendScanCount >= SEND_AT && (prefs.getInt("dataSharing", -1) == 1)) { //we are configured to share data and also it's time to do so!
+                        makeNetRequest(prefs.getString("sharingServer", "https://biostream-1024.appspot.com/sd?") + "deviceid=" + prefs.getInt("deviceID", 1) + "&contacts=" + hourly_total + "_noContact=" + noContactCount);
+                        hourly_total = 0;
+                        sendScanCount = 0;
+                    }
 
 
                     //checks for if the Bluetooth scan has failed
