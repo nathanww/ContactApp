@@ -102,6 +102,9 @@ public class MyForeGroundService extends Service {
     int SEND_AT = 30;
     int hourly_total = 0;
 
+    int scansSinceStartup = 0; //keeps track of number of scans run since startup; this allows us to ignore artifically inflated numbers that we get when the app first starts up
+    int WARMUP_TIME = 4; //time before scans start count as contacts
+
     void makeNetRequest(String URL) {
         RequestQueue netQ = Volley.newRequestQueue(getApplicationContext());
         StringRequest stringRequest = new StringRequest(Request.Method.POST, URL,
@@ -290,7 +293,12 @@ public class MyForeGroundService extends Service {
             public void run() {
                 try {
                     long startTime = System.currentTimeMillis();
-                    int contactCount = contactsThisCycle.length() - contactsThisCycle.replace(" ", "").length(); //count the number of space-seperated addresses in the contact list
+                    int contactCount = 0;
+                    if (scansSinceStartup >= WARMUP_TIME) { //only count contacts if we are passed the warmup period to avoid issues when the scan first starts running
+                        contactCount = contactsThisCycle.length() - contactsThisCycle.replace(" ", "").length(); //count the number of space-seperated addresses in the contact list
+
+                    }
+                    scansSinceStartup++;
                     contactsThisCycle = ""; //reset the counter
                     signalsThisCycle = ""; //same for all signals
                     SimpleDateFormat todayFormat = new SimpleDateFormat("dd-MMM-yyyy");
