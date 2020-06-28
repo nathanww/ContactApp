@@ -79,6 +79,7 @@ public class MyForeGroundService extends Service {
     HashMap<Long, ScanResult> contactList = new HashMap<Long, ScanResult>(); //stores contacts indexed by time, for suppressing contacts after they've been detected too much
     String contactsThisCycle = ""; //contacts that have been observed in a certain period of time
     int CONTACT_THRESH = -65; //signals closer than this count as a close contact
+    String scoringID = "2.1"; //identifies the version of the scoring algorithm being used
     BroadcastReceiver plugged = new pluggedIn();
     boolean isRunning = false; //flag for whether the service si running or not
     //these settings control how contacts stop "counting" once they have been observed for a certain period of time.
@@ -87,6 +88,7 @@ public class MyForeGroundService extends Service {
     //observed before they stop counting.
     long CONTACT_LIST_TIME = 1000 * 60 * (60); //number of ms contacts on the list should be kept for
     int CONTACT_LIST_MAX = 1; //start disregarding signals if they appear in more than this many scans
+    int MAX_CONTACTS = 4; //No more than this many contacts in a cycle to prevent giant short spikes from messing up the contact numbers
 
 
     String signalsThisCycle = ""; //signals of any strength that have already been encountered in the current scan
@@ -295,8 +297,12 @@ public class MyForeGroundService extends Service {
                     long startTime = System.currentTimeMillis();
                     int contactCount = 0;
                     if (scansSinceStartup >= WARMUP_TIME) { //only count contacts if we are passed the warmup period to avoid issues when the scan first starts running
-                        contactCount = contactsThisCycle.length() - contactsThisCycle.replace(" ", "").length(); //count the number of space-seperated addresses in the contact list
+                        contactCount = contactsThisCycle.split(" ").length; //count the number of space-seperated addresses in the contact list
 
+                    }
+
+                    if (contactCount > MAX_CONTACTS) {
+                        contactCount = MAX_CONTACTS;
                     }
                     scansSinceStartup++;
                     contactsThisCycle = ""; //reset the counter
@@ -338,7 +344,7 @@ public class MyForeGroundService extends Service {
                     sendScanCount++;
                     hourly_total = hourly_total + contactCount;
                     if (sendScanCount >= SEND_AT && (prefs.getInt("dataSharing", -1) == 1)) { //we are configured to share data and also it's time to do so!
-                        makeNetRequest(prefs.getString("sharingServer", "https://biostream-1024.appspot.com/sd?") + "deviceid=" + prefs.getInt("deviceID", 1) + "&contacts=" + hourly_total + "_noContact=" + noContactCount);
+                        makeNetRequest(prefs.getString("sharingServer", "https://biostream-1024.appspot.com/sd?") + "deviceid=" + prefs.getInt("deviceID", 1) + "&contacts=" + hourly_total + "_noContact=" + noContactCount + "_scoringID=" + scoringID);
                         hourly_total = 0;
                         sendScanCount = 0;
                     }
