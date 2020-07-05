@@ -19,17 +19,31 @@ import java.util.ConcurrentModificationException;
  */
 public class scanAndIgnore extends IntentService {
 
+    String nullSafe(Object data) { //prevent nulls from crashing the fingerprint function
+        if (data == null) {
+            return "null";
+        } else {
+            return data + "";
+        }
+
+
+    }
+
     String fingerprint(ScanResult result) {
-        String temp = result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy();
-        try {
-            MessageDigest m = MessageDigest.getInstance("MD5");
-            m.update(temp.getBytes());
-            byte[] digest = m.digest();
-            BigInteger bigInt = new BigInteger(1, digest);
-            String hashtext = bigInt.toString(16);
-            return hashtext;
-        } catch (NoSuchAlgorithmException e) { //if for some reason we can't do md5, just return the original
-            return temp;
+        if (result != null) {
+            String temp = nullSafe(result.getDevice().getName()) + ":" + nullSafe(result.getDevice().getType()) + ":" + nullSafe(result.getAdvertisingSid()) + ":" + nullSafe(result.getDevice().getBluetoothClass()) + ":" + nullSafe(result.getDevice().getUuids()) + ":" + nullSafe(result.getTxPower()) + ":" + nullSafe(result.getPeriodicAdvertisingInterval()) + ":" + nullSafe(result.getPrimaryPhy()) + ":" + nullSafe(result.getSecondaryPhy());
+            try {
+                MessageDigest m = MessageDigest.getInstance("MD5");
+                m.update(temp.getBytes());
+                byte[] digest = m.digest();
+                BigInteger bigInt = new BigInteger(1, digest);
+                String hashtext = bigInt.toString(16);
+                return hashtext;
+            } catch (NoSuchAlgorithmException e) { //if for some reason we can't do md5, just return the original
+                return temp;
+            }
+        } else {
+            return ("null");
         }
     }
 

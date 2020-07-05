@@ -79,7 +79,7 @@ public class MyForeGroundService extends Service {
     HashMap<Long, ScanResult> contactList = new HashMap<Long, ScanResult>(); //stores contacts indexed by time, for suppressing contacts after they've been detected too much
     String contactsThisCycle = ""; //contacts that have been observed in a certain period of time
     int CONTACT_THRESH = -65; //signals closer than this count as a close contact
-    String scoringID = "2.1"; //identifies the version of the scoring algorithm being used
+    String scoringID = "2.2"; //identifies the version of the scoring algorithm being used
     BroadcastReceiver plugged = new pluggedIn();
     boolean isRunning = false; //flag for whether the service si running or not
     //these settings control how contacts stop "counting" once they have been observed for a certain period of time.
@@ -127,17 +127,31 @@ public class MyForeGroundService extends Service {
         Log.i("netRequest", "sent " + URL);
     }
 
+    String nullSafe(Object data) { //prevent nulls from crashing the fingerprint function
+        if (data == null) {
+            return "null";
+        } else {
+            return data + "";
+        }
+
+
+    }
+
     String fingerprint(ScanResult result) {
-        String temp = result.getDevice().getName() + ":" + result.getDevice().getType() + ":" + result.getAdvertisingSid() + ":" + result.getDevice().getBluetoothClass() + ":" + result.getDevice().getUuids() + ":" + result.getTxPower() + ":" + result.getPeriodicAdvertisingInterval() + ":" + result.getPrimaryPhy() + ":" + result.getSecondaryPhy();
-        try {
-            MessageDigest m = MessageDigest.getInstance("MD5");
-            m.update(temp.getBytes());
-            byte[] digest = m.digest();
-            BigInteger bigInt = new BigInteger(1, digest);
-            String hashtext = bigInt.toString(16);
-            return hashtext;
-        } catch (NoSuchAlgorithmException e) { //if for some reason we can't do md5, just return the original
-            return temp;
+        if (result != null) {
+            String temp = nullSafe(result.getDevice().getName()) + ":" + nullSafe(result.getDevice().getType()) + ":" + nullSafe(result.getAdvertisingSid()) + ":" + nullSafe(result.getDevice().getBluetoothClass()) + ":" + nullSafe(result.getDevice().getUuids()) + ":" + nullSafe(result.getTxPower()) + ":" + nullSafe(result.getPeriodicAdvertisingInterval()) + ":" + nullSafe(result.getPrimaryPhy()) + ":" + nullSafe(result.getSecondaryPhy());
+            try {
+                MessageDigest m = MessageDigest.getInstance("MD5");
+                m.update(temp.getBytes());
+                byte[] digest = m.digest();
+                BigInteger bigInt = new BigInteger(1, digest);
+                String hashtext = bigInt.toString(16);
+                return hashtext;
+            } catch (NoSuchAlgorithmException e) { //if for some reason we can't do md5, just return the original
+                return temp;
+            }
+        } else {
+            return ("null");
         }
     }
 
@@ -436,7 +450,6 @@ public class MyForeGroundService extends Service {
                     if (result.getRssi() >= CONTACT_THRESH) {
                         long startTime = System.currentTimeMillis();
                         result.getDevice().fetchUuidsWithSdp(); //update the list of services offered by this device
-                        //check the ignore list, and also the number of times this contact has been observed in the contact list. If it's not in the ignore list and hasn't been observed too much, add it to the contact list
                         if (contactsThisCycle.indexOf(fingerprint(result)) == -1 && countContacts(fingerprint(result)) < CONTACT_LIST_MAX) {
                             contactsThisCycle = contactsThisCycle + fingerprint(result) + " ";
 
@@ -471,6 +484,7 @@ public class MyForeGroundService extends Service {
 
         HashMap<Long, ScanResult> contactCopy = (HashMap) contactList.clone();
         for (Long i : contactCopy.keySet()) {
+            Log.i("contact:" + fingerprint(contactList.get(i)), System.currentTimeMillis() - CONTACT_LIST_TIME + "");
             if (i < System.currentTimeMillis() - CONTACT_LIST_TIME) {
                 contactList.remove(i);
             }
@@ -484,7 +498,8 @@ public class MyForeGroundService extends Service {
 
             editor.putBoolean("hasContacts", true);
             editor.putString("contactList", json);
-            editor.commit();
+        editor.commit();
+        Log.i("cleancontacts", "cleaned");
 
     }
 
@@ -495,6 +510,7 @@ public class MyForeGroundService extends Service {
             try {
                 if (fingerprint(contactList.get(i)).equals(deviceid)) {
                     hits++;
+                    //Log.i("fingerprint",fingerprint(contactList.get(i)));
 
                 }
             } catch (NullPointerException e) { //sometimes we will encounter a 'null' device, in that case just skip it
